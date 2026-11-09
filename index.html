@@ -39,6 +39,11 @@
             background-size: 40px 40px;
             background-position: 0 0, 20px 20px;
         }
+        @media print {
+            body > *:not(#receiptModal) { display: none !important; }
+            #receiptModal { position: static !important; background: none !important; display: block !important; }
+            #receiptCard { box-shadow: none !important; max-height: none !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-full flex flex-col justify-between">
@@ -56,9 +61,6 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <button onclick="openAdminModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold px-4 py-2.5 rounded-lg transition flex items-center gap-2 shadow">
-                    <i class="fa-solid fa-users-gear"></i> View Submissions (<span id="submissionCount">0</span>)
-                </button>
                 <button onclick="scrollToForm()" class="bg-taekwondo-red hover:bg-red-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow-lg flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square"></i> Register Now
                 </button>
@@ -69,20 +71,20 @@
     <!-- Main Content Container -->
     <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8 space-y-8">
 
-        <!-- Gear Preview (front of page; shown only when photos exist) -->
-        <section id="gallerySection" class="hidden">
-            <div class="flex items-end justify-between mb-3 px-1">
+        <!-- Product Showcase (shown only when products exist) -->
+        <section id="productsSection" class="hidden">
+            <div class="flex items-end justify-between mb-4 px-1">
                 <div>
                     <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-shirt text-taekwondo-red"></i> Official Team Gear
                     </h2>
-                    <p class="text-xs text-slate-500">Tap a photo to enlarge. Swipe to see more.</p>
+                    <p class="text-xs text-slate-500">Tap a photo to enlarge. Check the available sizes, then order below.</p>
                 </div>
                 <button onclick="scrollToForm()" class="hidden sm:flex bg-taekwondo-red hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow items-center gap-2">
                     Order Now <i class="fa-solid fa-arrow-down"></i>
                 </button>
             </div>
-            <div id="galleryGrid" class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3 -mx-1 px-1"></div>
+            <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </section>
 
         <!-- Important Disclaimer Banner / Card -->
@@ -211,6 +213,13 @@
                                 <option value="2XL">2XL</option>
                                 <option value="3XL">3XL</option>
                             </select>
+
+                            <label for="backPrint" class="block text-xs font-semibold text-slate-700 mt-4 mb-1">
+                                Back Print Name (Surname / Name) <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="backPrint" maxlength="20" autocomplete="off" placeholder="e.g., DELA CRUZ"
+                                class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm uppercase focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                            <p class="text-[11px] text-slate-500 mt-1">This will be printed on the back of your t-shirt (max 20 characters). Please double-check the spelling.</p>
                         </div>
                     </div>
 
@@ -282,73 +291,49 @@
         <img id="lightboxImg" src="" alt="" class="max-h-[90vh] max-w-full rounded-xl shadow-2xl">
     </div>
 
-    <!-- Admin Submissions Modal -->
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+    <!-- Order Receipt / Submission Summary -->
+    <div id="receiptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] hidden items-center justify-center p-4">
+        <div id="receiptCard" class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto">
+            <div class="bg-emerald-600 text-white px-6 py-5 text-center">
+                <div class="mx-auto w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl mb-2"><i class="fa-solid fa-check"></i></div>
+                <h3 class="text-lg font-extrabold">Registration Submitted!</h3>
+                <p class="text-xs text-emerald-100">Here is a summary of your order. Please screenshot or print this for your records.</p>
+            </div>
+            <div class="p-6 space-y-4 text-sm">
+                <div class="flex justify-between text-xs text-slate-500">
+                    <span>Order No: <strong id="rcId" class="text-slate-900"></strong></span>
+                    <span id="rcDate"></span>
+                </div>
                 <div>
-                    <h3 class="font-bold text-lg flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-taekwondo-accent"></i> Registration Submissions
-                    </h3>
-                    <p class="text-xs text-slate-400">View and manage all registered orders for team uniforms.</p>
+                    <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400">Name</span>
+                    <p id="rcName" class="font-extrabold text-slate-900 text-base"></p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 shadow">
-                        <i class="fa-solid fa-file-excel"></i> Export CSV
-                    </button>
-                    <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white p-2 rounded-lg transition">
-                        <i class="fa-solid fa-xmark text-lg"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Modal Body / Table Container -->
-            <div class="p-6 overflow-y-auto flex-grow">
-                <!-- Gear Photo Manager -->
-                <div class="mb-6 border border-slate-200 rounded-xl p-4 bg-slate-50">
-                    <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up text-taekwondo-blue"></i> Gear Photos (shown on main page)
-                    </h4>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <input id="photoCaption" type="text" placeholder="Caption (e.g. Team T-Shirt - Front)" class="border border-slate-300 rounded-lg px-3 py-2 text-xs flex-1">
-                        <input id="photoFile" type="file" accept="image/*" multiple class="text-xs flex-1">
-                        <button id="photoUploadBtn" onclick="uploadPhotos()" class="bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition">Upload</button>
+                <div class="border border-slate-200 rounded-xl divide-y divide-slate-200">
+                    <div id="rcJacketRow" class="flex justify-between p-3">
+                        <div><p class="font-bold text-slate-900">Team Jacket</p><p id="rcJacketSize" class="text-xs text-slate-500"></p></div>
+                        <span class="font-bold">₱1,100</span>
                     </div>
-                    <div id="adminGallery" class="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-4"></div>
-                </div>
-                <div id="noSubmissions" class="text-center py-12 space-y-3">
-                    <div class="text-slate-300 text-5xl">
-                        <i class="fa-solid fa-folder-open"></i>
+                    <div id="rcTshirtRow" class="flex justify-between p-3">
+                        <div><p class="font-bold text-slate-900">T-Shirt</p><p id="rcTshirtSize" class="text-xs text-slate-500"></p><p id="rcBackPrint" class="text-xs text-taekwondo-blue font-bold"></p></div>
+                        <span class="font-bold">₱500</span>
                     </div>
-                    <p class="text-slate-500 font-medium text-sm">No registrations recorded yet.</p>
+                    <div class="flex justify-between p-3 bg-slate-50 rounded-b-xl">
+                        <span class="font-bold text-slate-700">Total Amount</span>
+                        <span id="rcTotal" class="font-black text-taekwondo-blue text-lg"></span>
+                    </div>
                 </div>
-
-                <div id="tableContainer" class="hidden overflow-x-auto border border-slate-200 rounded-xl">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
-                                <th class="p-3">Name / Date</th>
-                                <th class="p-3">Jacket</th>
-                                <th class="p-3">T-Shirt</th>
-                                <th class="p-3">Fulfillment</th>
-                                <th class="p-3">Total</th>
-                                <th class="p-3">Payment</th>
-                                <th class="p-3 text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="submissionsTableBody" class="divide-y divide-slate-200">
-                            <!-- Dynamic rows injected here -->
-                        </tbody>
-                    </table>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div><span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block">Fulfillment</span><p id="rcFulfillment" class="font-semibold text-slate-800"></p></div>
+                    <div><span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block">Payment Status</span><p id="rcPayment" class="font-semibold text-slate-800"></p></div>
                 </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-                <span id="modalSummaryText">Total Entries: 0</span>
-                <button onclick="clearAllData()" class="text-red-600 hover:text-red-800 font-semibold flex items-center gap-1">
-                    <i class="fa-solid fa-trash-can"></i> Reset All Data
-                </button>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 leading-relaxed">
+                    <strong>Reminder:</strong> Payment deadline is <strong>November 11, 2026</strong>. Production takes about 12–15 days (excluding Sundays and holidays).
+                    Supplier: KALOSph Las Piñas, <strong>09620485439</strong>.
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button onclick="window.print()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-lg text-sm"><i class="fa-solid fa-print"></i> Print</button>
+                    <button onclick="closeReceipt()" class="flex-1 bg-taekwondo-blue hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg text-sm">Done</button>
+                </div>
             </div>
         </div>
     </div>
@@ -368,16 +353,15 @@
     <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 mt-12 text-center text-xs space-y-2">
         <p class="font-semibold text-slate-300">Batang Pinoy Taekwondo Team Gear Initiative</p>
         <p>Supplier: KALOSph Las Piñas (#17 Las Piñas Commercial Complex, Talon Uno Las Piñas City | Tel: 09620485439)</p>
-        <p class="text-slate-500 pt-2">&copy; 2026 Batang Pinoy Taekwondo. All rights reserved.</p>
+        <p class="text-slate-500 pt-2">&copy; 2026 Batang Pinoy Taekwondo. All rights reserved. &nbsp;|&nbsp; <a href="admin.html" class="text-slate-400 hover:text-white underline"><i class="fa-solid fa-lock"></i> Admin</a></p>
     </footer>
 
     <!-- JavaScript Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, getDocs, writeBatch, serverTimestamp }
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp }
             from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCOwYNQDTJGJb1-Ex_mOyT1WeSRnoMI7vE",
             authDomain: "batangpinoy.firebaseapp.com",
@@ -390,26 +374,11 @@
         const db = getFirestore(app);
         const registrationsRef = collection(db, 'registrations');
 
-        // In-memory cache, kept live by Firestore
-        let submissions = [];
-
         // Prices
         const PRICE_JACKET = 1100;
         const PRICE_TSHIRT = 500;
 
-        // Initialize on load
         updateCalculation();
-        updateSubmissionCount();
-
-        // Live sync from Firestore
-        onSnapshot(query(registrationsRef, orderBy('createdAt', 'asc')), (snap) => {
-            submissions = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-            updateSubmissionCount();
-            if (!document.getElementById('adminModal').classList.contains('hidden')) renderSubmissionsTable();
-        }, (err) => {
-            console.error('Firestore error:', err);
-            showToast('Connection Error', 'Cannot reach the database. Check Firestore rules/connection.', 'error');
-        });
 
         // Scroll to form helper
         function scrollToForm() {
@@ -441,16 +410,20 @@
             const checkbox = document.getElementById('buyTshirt');
             const container = document.getElementById('tshirtSizeContainer');
             const select = document.getElementById('tshirtSize');
+            const backPrint = document.getElementById('backPrint');
             const card = document.getElementById('tshirtCard');
 
             if (checkbox.checked) {
                 container.classList.remove('opacity-40', 'pointer-events-none');
                 select.setAttribute('required', 'true');
+                backPrint.setAttribute('required', 'true');
                 card.classList.add('border-taekwondo-blue', 'bg-white', 'shadow-sm');
             } else {
                 container.classList.add('opacity-40', 'pointer-events-none');
                 select.removeAttribute('required');
                 select.value = '';
+                backPrint.removeAttribute('required');
+                backPrint.value = '';
                 card.classList.remove('border-taekwondo-blue', 'bg-white', 'shadow-sm');
             }
             updateCalculation();
@@ -500,6 +473,7 @@
             const fullName = document.getElementById('fullName').value.trim();
             const jacketSize = buyJacket ? document.getElementById('jacketSize').value : 'N/A';
             const tshirtSize = buyTshirt ? document.getElementById('tshirtSize').value : 'N/A';
+            const backPrint = buyTshirt ? document.getElementById('backPrint').value.trim().toUpperCase() : '';
             const fulfillment = document.querySelector('input[name="fulfillment"]:checked').value;
             const deliveryNote = fulfillment === 'Delivery' ? 'Delivery (Contact 09620485439)' : 'Store Pickup (KALOSph)';
             const paymentStatus = document.getElementById('paymentStatus').value;
@@ -514,6 +488,7 @@
                 fullName,
                 jacket: buyJacket ? `Yes (${jacketSize})` : 'No',
                 tshirt: buyTshirt ? `Yes (${tshirtSize})` : 'No',
+                backPrint,
                 fulfillment,
                 deliveryNote,
                 paymentStatus,
@@ -535,9 +510,33 @@
             toggleTshirtOptions();
             toggleFulfillment();
             updateCalculation();
-            updateSubmissionCount();
 
             showToast('Registration Successful!', `${fullName}, your gear order has been recorded.`);
+            showReceipt(record, backPrint, jacketSize, tshirtSize);
+        }
+
+        // Show the customer a summary of what they just submitted
+        function showReceipt(r, backPrint, jacketSize, tshirtSize) {
+            const set = (id, v) => { document.getElementById(id).innerText = v; };
+            set('rcId', r.id);
+            set('rcDate', r.date);
+            set('rcName', r.fullName);
+            set('rcTotal', '₱' + r.total.toLocaleString('en-US', { minimumFractionDigits: 2 }));
+            set('rcFulfillment', r.deliveryNote);
+            set('rcPayment', r.paymentStatus);
+            const hasJacket = r.jacket !== 'No', hasTshirt = r.tshirt !== 'No';
+            document.getElementById('rcJacketRow').classList.toggle('hidden', !hasJacket);
+            document.getElementById('rcTshirtRow').classList.toggle('hidden', !hasTshirt);
+            set('rcJacketSize', 'Size: ' + jacketSize);
+            set('rcTshirtSize', 'Size: ' + tshirtSize);
+            set('rcBackPrint', backPrint ? 'Back print: ' + backPrint : '');
+            const m = document.getElementById('receiptModal');
+            m.classList.remove('hidden'); m.classList.add('flex');
+        }
+        function closeReceipt() {
+            const m = document.getElementById('receiptModal');
+            m.classList.add('hidden'); m.classList.remove('flex');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Toast Notification Helper
@@ -552,215 +551,62 @@
             }, 4000);
         }
 
-        // Submission Count Badge
-        function updateSubmissionCount() {
-            document.getElementById('submissionCount').innerText = submissions.length;
+
+        // ---------- Product showcase ----------
+        let products = [];
+        onSnapshot(query(collection(db, 'products'), orderBy('createdAt', 'asc')), (snap) => {
+            products = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+            renderProducts();
+        }, (err) => console.error('Products error:', err));
+
+        function esc(t) {
+            return String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        // Open Admin Submissions Modal
-        function openAdminModal() {
-            renderSubmissionsTable();
-            document.getElementById('adminModal').classList.remove('hidden');
-        }
-
-        // Close Admin Submissions Modal
-        function closeAdminModal() {
-            document.getElementById('adminModal').classList.add('hidden');
-        }
-
-        // Render Table Data
-        function renderSubmissionsTable() {
-            const tbody = document.getElementById('submissionsTableBody');
-            const noSub = document.getElementById('noSubmissions');
-            const tableContainer = document.getElementById('tableContainer');
-            const summaryText = document.getElementById('modalSummaryText');
-
-            tbody.innerHTML = '';
-            summaryText.innerText = `Total Entries: ${submissions.length}`;
-
-            if (submissions.length === 0) {
-                noSub.classList.remove('hidden');
-                tableContainer.classList.add('hidden');
-                return;
-            }
-
-            noSub.classList.add('hidden');
-            tableContainer.classList.remove('hidden');
-
-            submissions.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition text-xs";
-
-                const paymentBadge = item.paymentStatus === 'Paid' 
-                    ? '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Paid</span>'
-                    : '<span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">Pending</span>';
-
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-800">
-                        ${item.fullName}
-                        <span class="block text-[10px] text-slate-400 font-normal">${item.date}</span>
-                    </td>
-                    <td class="p-3">${item.jacket}</td>
-                    <td class="p-3">${item.tshirt}</td>
-                    <td class="p-3">
-                        <span class="font-medium">${item.fulfillment}</span>
-                        <span class="block text-[10px] text-slate-400">${item.deliveryNote}</span>
-                    </td>
-                    <td class="p-3 font-bold text-slate-900">₱${item.total.toLocaleString()}</td>
-                    <td class="p-3">${paymentBadge}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="deleteSubmission('${item.docId}')" class="text-slate-400 hover:text-red-600 p-1 transition" title="Delete Entry">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Delete single submission
-        async function deleteSubmission(docId) {
-            if (confirm('Are you sure you want to delete this registration entry?')) {
-                try { await deleteDoc(doc(db, 'registrations', docId)); }
-                catch (err) { console.error(err); alert('Delete failed.'); }
-            }
-        }
-
-        // Reset all data
-        async function clearAllData() {
-            if (confirm('Are you sure you want to clear all registrations? This cannot be undone.')) {
-                try {
-                    const snap = await getDocs(registrationsRef);
-                    const batch = writeBatch(db);
-                    snap.forEach(d => batch.delete(d.ref));
-                    await batch.commit();
-                } catch (err) { console.error(err); alert('Clear failed.'); }
-            }
-        }
-
-        // Export Submissions to CSV
-        function exportToCSV() {
-            if (submissions.length === 0) {
-                alert('No data available to export.');
-                return;
-            }
-
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "ID,Date,Full Name,Jacket,T-Shirt,Fulfillment Method,Details,Payment Status,Total Amount (PHP)\r\n";
-
-            submissions.forEach(item => {
-                let row = [
-                    item.id,
-                    item.date,
-                    `"${item.fullName}"`,
-                    `"${item.jacket}"`,
-                    `"${item.tshirt}"`,
-                    `"${item.fulfillment}"`,
-                    `"${item.deliveryNote}"`,
-                    item.paymentStatus,
-                    item.total
-                ];
-                csvContent += row.join(",") + "\r\n";
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "Batang_Pinoy_Taekwondo_Registrations.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // ---------- Gear photo gallery ----------
-        const galleryRef = collection(db, 'gallery');
-        let photos = [];
-
-        onSnapshot(query(galleryRef, orderBy('createdAt', 'asc')), (snap) => {
-            photos = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-            renderGallery();
-        }, (err) => console.error('Gallery error:', err));
-
-        function escapeAttr(t) {
-            return String(t || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-        }
-
-        function renderGallery() {
-            const section = document.getElementById('gallerySection');
-            const grid = document.getElementById('galleryGrid');
-            const admin = document.getElementById('adminGallery');
-            section.classList.toggle('hidden', photos.length === 0);
-
-            grid.innerHTML = photos.map(p => `
-                <figure class="group cursor-zoom-in snap-start shrink-0 w-64 sm:w-72 bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden" onclick="openLightbox('${p.docId}')">
-                    <div class="aspect-[4/5] overflow-hidden bg-slate-100">
-                        <img src="${p.image}" alt="${escapeAttr(p.caption)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+        function renderProducts() {
+            document.getElementById('productsSection').classList.toggle('hidden', products.length === 0);
+            document.getElementById('productsGrid').innerHTML = products.map(p => {
+                const imgs = p.images || [];
+                const thumbs = imgs.length > 1 ? `<div class="flex gap-2 p-3 pb-0">` + imgs.map((im, i) =>
+                    `<img src="${im}" onclick="swapImage('${p.docId}', ${i})" class="w-12 h-12 object-cover rounded-lg border-2 ${i === 0 ? 'border-taekwondo-red' : 'border-transparent'} cursor-pointer opacity-90 hover:opacity-100" data-thumb="${p.docId}">`
+                ).join('') + `</div>` : '';
+                const sizes = (p.sizes || []).map(sz => `<span class="text-xs font-bold border border-slate-300 rounded-md px-2.5 py-1 text-slate-700">${esc(sz)}</span>`).join('');
+                return `
+                <article class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden flex flex-col">
+                    <div class="aspect-[4/5] bg-slate-100 overflow-hidden cursor-zoom-in" onclick="openLightbox('${p.docId}')">
+                        <img id="main-${p.docId}" src="${imgs[0] || ''}" alt="${esc(p.name)}" class="w-full h-full object-cover hover:scale-105 transition duration-300">
                     </div>
-                    ${p.caption ? `<figcaption class="text-sm text-slate-800 font-bold px-4 py-3 text-center">${escapeAttr(p.caption)}</figcaption>` : ''}
-                </figure>`).join('');
-
-            admin.innerHTML = photos.map(p => `
-                <div class="relative">
-                    <img src="${p.image}" alt="" class="w-full aspect-square object-cover rounded-lg border border-slate-200">
-                    <button onclick="deletePhoto('${p.docId}')" title="Delete photo" class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white w-6 h-6 rounded-full text-[10px] shadow">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>`).join('');
+                    ${thumbs}
+                    <div class="p-5 flex-1 flex flex-col gap-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                ${p.category ? `<span class="text-[10px] uppercase tracking-widest font-bold text-taekwondo-red">${esc(p.category)}</span>` : ''}
+                                <h3 class="font-extrabold text-lg text-slate-900 leading-tight">${esc(p.name)}</h3>
+                            </div>
+                            ${p.price ? `<span class="font-black text-taekwondo-blue whitespace-nowrap">₱${Number(p.price).toLocaleString()}</span>` : ''}
+                        </div>
+                        ${p.description ? `<p class="text-sm text-slate-600 leading-relaxed whitespace-pre-line">${esc(p.description)}</p>` : ''}
+                        ${sizes ? `<div><span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block mb-1.5">Available Sizes</span><div class="flex flex-wrap gap-1.5">${sizes}</div></div>` : ''}
+                    </div>
+                </article>`;
+            }).join('');
         }
 
-        // Resize + compress so it fits in a Firestore document (1 MB limit)
-        function compressImage(file, maxSide = 900, quality = 0.8) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                const url = URL.createObjectURL(file);
-                img.onload = () => {
-                    const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-                    const canvas = document.createElement('canvas');
-                    canvas.width = Math.round(img.width * scale);
-                    canvas.height = Math.round(img.height * scale);
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    URL.revokeObjectURL(url);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
-                };
-                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Invalid image')); };
-                img.src = url;
+        function swapImage(docId, i) {
+            const p = products.find(x => x.docId === docId);
+            if (!p) return;
+            document.getElementById('main-' + docId).src = p.images[i];
+            document.querySelectorAll(`[data-thumb="${docId}"]`).forEach((el, idx) => {
+                el.classList.toggle('border-taekwondo-red', idx === i);
+                el.classList.toggle('border-transparent', idx !== i);
             });
-        }
-
-        async function uploadPhotos() {
-            const input = document.getElementById('photoFile');
-            const caption = document.getElementById('photoCaption').value.trim();
-            const btn = document.getElementById('photoUploadBtn');
-            if (!input.files.length) { showToast('No file', 'Please choose at least one photo.', 'error'); return; }
-
-            btn.disabled = true; btn.innerText = 'Uploading...';
-            try {
-                for (const file of input.files) {
-                    const image = await compressImage(file);
-                    if (image.length > 900000) { showToast('Too large', `${file.name} is too big even after compression.`, 'error'); continue; }
-                    await addDoc(galleryRef, { image, caption, createdAt: serverTimestamp() });
-                }
-                input.value = ''; document.getElementById('photoCaption').value = '';
-                showToast('Uploaded!', 'Photo(s) now showing on the main page.');
-            } catch (err) {
-                console.error(err);
-                showToast('Upload failed', 'Check Firestore rules and connection.', 'error');
-            } finally {
-                btn.disabled = false; btn.innerText = 'Upload';
-            }
-        }
-
-        async function deletePhoto(docId) {
-            if (confirm('Delete this photo from the main page?')) {
-                try { await deleteDoc(doc(db, 'gallery', docId)); }
-                catch (err) { console.error(err); alert('Delete failed.'); }
-            }
+            p._current = i;
         }
 
         function openLightbox(docId) {
-            const p = photos.find(x => x.docId === docId);
-            if (!p) return;
-            document.getElementById('lightboxImg').src = p.image;
+            const p = products.find(x => x.docId === docId);
+            if (!p || !p.images?.length) return;
+            document.getElementById('lightboxImg').src = p.images[p._current || 0];
             const lb = document.getElementById('lightbox');
             lb.classList.remove('hidden'); lb.classList.add('flex');
         }
@@ -769,12 +615,9 @@
             lb.classList.add('hidden'); lb.classList.remove('flex');
         }
 
-        // Expose functions for inline HTML handlers (module scope is private)
         Object.assign(window, {
             scrollToForm, toggleJacketOptions, toggleTshirtOptions, toggleFulfillment,
-            handleFormSubmit, openAdminModal, closeAdminModal, deleteSubmission,
-            clearAllData, exportToCSV,
-            uploadPhotos, deletePhoto, openLightbox, closeLightbox
+            handleFormSubmit, closeReceipt, swapImage, openLightbox, closeLightbox
         });
     </script>
 </body>

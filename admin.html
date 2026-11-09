@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Batang Pinoy Taekwondo Gear</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                fontFamily: { sans: ['Inter', 'sans-serif'] },
+                colors: { taekwondo: { blue: '#0047AB', red: '#E31B23', dark: '#0F172A', accent: '#F59E0B' } }
+            } }
+        }
+    </script>
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-full">
+
+    <!-- ============ LOGIN ============ -->
+    <div id="loginView" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <form id="loginForm" class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden">
+            <div class="bg-slate-900 text-white px-6 py-5 border-b-4 border-taekwondo-red">
+                <p class="text-[10px] uppercase tracking-widest text-taekwondo-accent font-bold">Batang Pinoy Taekwondo</p>
+                <h1 class="text-xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-lock"></i> Admin Login</h1>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-600">Username</label>
+                    <input id="loginUser" type="text" autocomplete="username" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-600">Password</label>
+                    <input id="loginPass" type="password" autocomplete="current-password" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                </div>
+                <p id="loginError" class="text-xs text-red-600 font-semibold hidden"></p>
+                <button id="loginBtn" type="submit" class="w-full bg-taekwondo-red hover:bg-red-700 text-white font-bold py-2.5 rounded-lg transition">Log In</button>
+                <a href="index.html" class="block text-center text-xs text-slate-500 hover:text-slate-800 underline">&larr; Back to main page</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div id="dashView" class="hidden">
+        <header class="bg-slate-900 text-white border-b-4 border-taekwondo-red">
+            <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest text-taekwondo-accent font-bold">Admin Panel</p>
+                    <h1 class="text-lg font-extrabold">Batang Pinoy Taekwondo Gear</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="index.html" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-3.5 py-2 rounded-lg"><i class="fa-solid fa-up-right-from-square"></i> View Site</a>
+                    <button onclick="logout()" class="bg-taekwondo-red hover:bg-red-700 text-xs font-bold px-3.5 py-2 rounded-lg"><i class="fa-solid fa-right-from-bracket"></i> Log Out</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-4 py-6">
+            <!-- Tabs -->
+            <div class="flex gap-2 mb-6">
+                <button id="tabProducts" onclick="showTab('products')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-shirt"></i> Products</button>
+                <button id="tabOrders" onclick="showTab('orders')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-list-check"></i> Orders (<span id="orderCount">0</span>)</button>
+            </div>
+
+            <!-- ===== Products tab ===== -->
+            <div id="productsTab" class="grid lg:grid-cols-5 gap-6">
+                <!-- Form -->
+                <form id="productForm" class="lg:col-span-2 bg-white rounded-2xl shadow p-5 space-y-4 h-fit">
+                    <h2 id="formTitle" class="font-extrabold text-slate-900">Add New Product</h2>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Product Name *</label>
+                        <input id="pName" required maxlength="80" placeholder="e.g. Official Team Jacket" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600">Category</label>
+                            <select id="pCategory" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+                                <option>Jacket</option><option>T-Shirt</option><option>Pants</option><option>Cap</option><option>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600">Price (₱)</label>
+                            <input id="pPrice" type="number" min="0" step="1" placeholder="1100" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Description</label>
+                        <textarea id="pDesc" rows="3" maxlength="500" placeholder="Material, design, fit..." class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Available Sizes</label>
+                        <div id="sizeChips" class="mt-2 flex flex-wrap gap-2"></div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Photos (up to 4)</label>
+                        <input id="pFiles" type="file" accept="image/*" multiple class="mt-1 w-full text-xs">
+                        <p id="editImgNote" class="text-[11px] text-slate-500 mt-1 hidden">Leave empty to keep the current photos. Choosing new photos replaces them.</p>
+                        <div id="imgPreview" class="flex gap-2 mt-2 flex-wrap"></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="saveBtn" type="submit" class="flex-1 bg-slate-900 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm">Add Product</button>
+                        <button id="cancelEditBtn" type="button" onclick="resetForm()" class="hidden px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-sm">Cancel</button>
+                    </div>
+                </form>
+
+                <!-- List -->
+                <div class="lg:col-span-3 space-y-3">
+                    <h2 class="font-extrabold text-slate-900">Products on Main Page (<span id="productCount">0</span>)</h2>
+                    <div id="productList" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- ===== Orders tab ===== -->
+            <div id="ordersTab" class="hidden bg-white rounded-2xl shadow overflow-hidden">
+                <div class="px-5 py-4 flex items-center justify-between border-b border-slate-200">
+                    <h2 class="font-extrabold text-slate-900">Registration Submissions</h2>
+                    <div class="flex gap-2">
+                        <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg"><i class="fa-solid fa-file-excel"></i> Export CSV</button>
+                        <button onclick="clearAllOrders()" class="text-red-600 hover:text-red-800 text-xs font-semibold px-2"><i class="fa-solid fa-trash-can"></i> Reset All</button>
+                    </div>
+                </div>
+                <div id="noOrders" class="text-center py-12 text-sm text-slate-500">No registrations recorded yet.</div>
+                <div id="ordersWrap" class="hidden overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 uppercase tracking-wider font-bold">
+                                <th class="p-3">Name / Date</th><th class="p-3">Jacket</th><th class="p-3">T-Shirt</th>
+                                <th class="p-3">Fulfillment</th><th class="p-3">Total</th><th class="p-3">Payment</th><th class="p-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersBody" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl z-50 transition-all duration-300 translate-y-20 opacity-0">
+        <h4 id="toastTitle" class="text-sm font-bold"></h4>
+        <p id="toastMsg" class="text-xs text-slate-300"></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, getDocs, writeBatch, serverTimestamp }
+            from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOwYNQDTJGJb1-Ex_mOyT1WeSRnoMI7vE",
+            authDomain: "batangpinoy.firebaseapp.com",
+            projectId: "batangpinoy",
+            storageBucket: "batangpinoy.firebasestorage.app",
+            messagingSenderId: "331292574593",
+            appId: "1:331292574593:web:24e7d39d3fffa290d75e80"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const productsRef = collection(db, 'products');
+        const ordersRef = collection(db, 'registrations');
+
+        const SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', 'Kids 6', 'Kids 8', 'Kids 10', 'Kids 12', 'Kids 14', 'Free Size'];
+        const ADMIN_DOMAIN = '@batangpinoy.com';   // username "iss" -> iss@batangpinoy.com in Firebase Auth
+
+        let products = [], orders = [];
+        let editingId = null, unsubscribers = [];
+
+        const $ = (id) => document.getElementById(id);
+        const esc = (t) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+        function toast(title, msg) {
+            $('toastTitle').innerText = title; $('toastMsg').innerText = msg;
+            $('toast').classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => $('toast').classList.add('translate-y-20', 'opacity-0'), 3500);
+        }
+
+        // ---------------- Auth ----------------
+        $('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = $('loginUser').value.trim().toLowerCase();
+            const pass = $('loginPass').value;
+            const err = $('loginError'); err.classList.add('hidden');
+            $('loginBtn').disabled = true; $('loginBtn').innerText = 'Logging in...';
+            try {
+                await signInWithEmailAndPassword(auth, user + ADMIN_DOMAIN, pass);
+            } catch (ex) {
+                console.error(ex);
+                err.innerText = ['auth/invalid-credential', 'auth/wrong-password', 'auth/user-not-found', 'auth/invalid-email'].includes(ex.code)
+                    ? 'Wrong username or password.' : 'Login failed (' + (ex.code || 'error') + ').';
+                err.classList.remove('hidden');
+            } finally {
+                $('loginBtn').disabled = false; $('loginBtn').innerText = 'Log In';
+            }
+        });
+
+        function logout() { signOut(auth); }
+
+        onAuthStateChanged(auth, (user) => {
+            unsubscribers.forEach(u => u()); unsubscribers = [];
+            if (user) {
+                $('loginView').classList.add('hidden');
+                $('dashView').classList.remove('hidden');
+                startListeners();
+                showTab('products');
+            } else {
+                $('dashView').classList.add('hidden');
+                $('loginView').classList.remove('hidden');
+                $('loginPass').value = '';
+            }
+        });
+
+        function startListeners() {
+            unsubscribers.push(onSnapshot(query(productsRef, orderBy('createdAt', 'asc')), (snap) => {
+                products = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+                renderProducts();
+            }, (e) => { console.error(e); toast('Error', 'Cannot load products. Check Firestore rules.'); }));
+            unsubscribers.push(onSnapshot(query(ordersRef, orderBy('createdAt', 'asc')), (snap) => {
+                orders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+                renderOrders();
+            }, (e) => { console.error(e); toast('Error', 'Cannot load orders. Check Firestore rules.'); }));
+        }
+
+        // ---------------- Tabs ----------------
+        function showTab(name) {
+            const on = 'bg-slate-900 text-white', off = 'bg-white text-slate-600 hover:bg-slate-200 shadow';
+            $('productsTab').classList.toggle('hidden', name !== 'products');
+            $('ordersTab').classList.toggle('hidden', name !== 'orders');
+            $('tabProducts').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'products' ? on : off);
+            $('tabOrders').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'orders' ? on : off);
+        }
+
+        // ---------------- Products ----------------
+        $('sizeChips').innerHTML = SIZES.map(sz => `
+            <label class="cursor-pointer select-none">
+                <input type="checkbox" value="${sz}" class="peer hidden size-cb">
+                <span class="block text-xs font-bold border border-slate-300 rounded-md px-2.5 py-1.5 text-slate-600 peer-checked:bg-slate-900 peer-checked:text-white peer-checked:border-slate-900">${sz}</span>
+            </label>`).join('');
+
+        function compressImage(file, maxSide = 800, quality = 0.75) {
+            return new Promise((resolve, reject) => {
+                const img = new Image(); const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+                    const c = document.createElement('canvas');
+                    c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                    URL.revokeObjectURL(url);
+                    resolve(c.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Invalid image')); };
+                img.src = url;
+            });
+        }
+
+        $('pFiles').addEventListener('change', async () => {
+            const files = [...$('pFiles').files].slice(0, 4);
+            const prev = $('imgPreview'); prev.innerHTML = '';
+            for (const f of files) {
+                const u = URL.createObjectURL(f);
+                prev.insertAdjacentHTML('beforeend', `<img src="${u}" class="w-16 h-16 object-cover rounded-lg border border-slate-200">`);
+            }
+        });
+
+        $('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = $('saveBtn'); btn.disabled = true; btn.innerText = 'Saving...';
+            try {
+                const sizes = [...document.querySelectorAll('.size-cb:checked')].map(c => c.value);
+                const data = {
+                    name: $('pName').value.trim(),
+                    category: $('pCategory').value,
+                    price: $('pPrice').value ? Number($('pPrice').value) : null,
+                    description: $('pDesc').value.trim(),
+                    sizes
+                };
+
+                const files = [...$('pFiles').files].slice(0, 4);
+                if (files.length) {
+                    const images = [];
+                    for (const f of files) images.push(await compressImage(f));
+                    if (images.join('').length > 900000) { toast('Photos too large', 'Use fewer or smaller photos.'); return; }
+                    data.images = images;
+                } else if (!editingId) {
+                    toast('Photo required', 'Please add at least one photo.'); return;
+                }
+
+                if (editingId) {
+                    await updateDoc(doc(db, 'products', editingId), data);
+                    toast('Updated', 'Product updated on the main page.');
+                } else {
+                    await addDoc(productsRef, { ...data, createdAt: serverTimestamp() });
+                    toast('Added', 'Product is now showing on the main page.');
+                }
+                resetForm();
+            } catch (err) {
+                console.error(err);
+                toast('Save failed', 'Check your login and Firestore rules.');
+            } finally {
+                btn.disabled = false; btn.innerText = editingId ? 'Save Changes' : 'Add Product';
+            }
+        });
+
+        function resetForm() {
+            editingId = null;
+            $('productForm').reset();
+            document.querySelectorAll('.size-cb').forEach(c => c.checked = false);
+            $('imgPreview').innerHTML = '';
+            $('formTitle').innerText = 'Add New Product';
+            $('saveBtn').innerText = 'Add Product';
+            $('cancelEditBtn').classList.add('hidden');
+            $('editImgNote').classList.add('hidden');
+        }
+
+        function editProduct(id) {
+            const p = products.find(x => x.docId === id); if (!p) return;
+            editingId = id;
+            $('pName').value = p.name || '';
+            $('pCategory').value = p.category || 'Other';
+            $('pPrice').value = p.price ?? '';
+            $('pDesc').value = p.description || '';
+            document.querySelectorAll('.size-cb').forEach(c => c.checked = (p.sizes || []).includes(c.value));
+            $('pFiles').value = '';
+            $('imgPreview').innerHTML = (p.images || []).map(im => `<img src="${im}" class="w-16 h-16 object-cover rounded-lg border border-slate-200">`).join('');
+            $('formTitle').innerText = 'Edit Product';
+            $('saveBtn').innerText = 'Save Changes';
+            $('cancelEditBtn').classList.remove('hidden');
+            $('editImgNote').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Delete this product from the main page?')) return;
+            try { await deleteDoc(doc(db, 'products', id)); if (editingId === id) resetForm(); }
+            catch (err) { console.error(err); toast('Delete failed', 'Check your login and rules.'); }
+        }
+
+        function renderProducts() {
+            $('productCount').innerText = products.length;
+            $('productList').innerHTML = products.length ? products.map(p => `
+                <div class="bg-white rounded-2xl shadow p-4 flex gap-4">
+                    <img src="${(p.images || [])[0] || ''}" class="w-24 h-28 object-cover rounded-xl border border-slate-200 shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-taekwondo-red">${esc(p.category)}</span>
+                                <h3 class="font-extrabold text-slate-900 leading-tight">${esc(p.name)}</h3>
+                            </div>
+                            ${p.price ? `<span class="font-black text-taekwondo-blue text-sm">₱${Number(p.price).toLocaleString()}</span>` : ''}
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1 line-clamp-2">${esc(p.description)}</p>
+                        <div class="flex flex-wrap gap-1 mt-2">${(p.sizes || []).map(s => `<span class="text-[10px] font-bold border border-slate-300 rounded px-1.5 py-0.5">${esc(s)}</span>`).join('')}</div>
+                        <div class="flex gap-3 mt-3 text-xs font-bold">
+                            <button onclick="editProduct('${p.docId}')" class="text-taekwondo-blue hover:underline"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button onclick="deleteProduct('${p.docId}')" class="text-red-600 hover:underline"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                        </div>
+                    </div>
+                </div>`).join('') : '<div class="bg-white rounded-2xl shadow p-8 text-center text-sm text-slate-500">No products yet. Add your first one on the left.</div>';
+        }
+
+        // ---------------- Orders ----------------
+        function renderOrders() {
+            $('orderCount').innerText = orders.length;
+            $('noOrders').classList.toggle('hidden', orders.length > 0);
+            $('ordersWrap').classList.toggle('hidden', orders.length === 0);
+            $('ordersBody').innerHTML = orders.map(o => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-semibold text-slate-800">${esc(o.fullName)}<span class="block text-[10px] text-slate-400 font-normal">${esc(o.date)} · ${esc(o.id)}</span></td>
+                    <td class="p-3">${esc(o.jacket)}</td>
+                    <td class="p-3">${esc(o.tshirt)}${o.backPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.backPrint)}</span>` : ''}</td>
+                    <td class="p-3">${esc(o.fulfillment)}<span class="block text-[10px] text-slate-400">${esc(o.deliveryNote)}</span></td>
+                    <td class="p-3 font-bold">₱${Number(o.total || 0).toLocaleString()}</td>
+                    <td class="p-3">
+                        <select onchange="setPayment('${o.docId}', this.value)" class="border rounded-md px-2 py-1 text-xs font-bold ${o.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200'}">
+                            <option ${o.paymentStatus === 'Paid' ? 'selected' : ''}>Paid</option>
+                            <option ${o.paymentStatus !== 'Paid' ? 'selected' : ''}>Pending</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-center"><button onclick="deleteOrder('${o.docId}')" class="text-slate-400 hover:text-red-600" title="Delete"><i class="fa-solid fa-trash-can"></i></button></td>
+                </tr>`).join('');
+        }
+
+        async function setPayment(id, status) {
+            try { await updateDoc(doc(db, 'registrations', id), { paymentStatus: status }); }
+            catch (err) { console.error(err); toast('Update failed', 'Check your login and rules.'); }
+        }
+        async function deleteOrder(id) {
+            if (!confirm('Delete this registration entry?')) return;
+            try { await deleteDoc(doc(db, 'registrations', id)); }
+            catch (err) { console.error(err); toast('Delete failed', 'Check your login and rules.'); }
+        }
+        async function clearAllOrders() {
+            if (!confirm('Clear ALL registrations? This cannot be undone.')) return;
+            try {
+                const snap = await getDocs(ordersRef);
+                const batch = writeBatch(db);
+                snap.forEach(d => batch.delete(d.ref));
+                await batch.commit();
+            } catch (err) { console.error(err); toast('Clear failed', 'Check your login and rules.'); }
+        }
+
+        function exportToCSV() {
+            if (!orders.length) { alert('No data available to export.'); return; }
+            const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            let csv = 'ID,Date,Full Name,Jacket,T-Shirt,Back Print Name,Fulfillment Method,Details,Payment Status,Total Amount (PHP)\r\n';
+            orders.forEach(o => { csv += [o.id, o.date, q(o.fullName), q(o.jacket), q(o.tshirt), q(o.backPrint), q(o.fulfillment), q(o.deliveryNote), o.paymentStatus, o.total].join(',') + '\r\n'; });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            a.download = 'Batang_Pinoy_Taekwondo_Registrations.csv';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+
+        Object.assign(window, { logout, showTab, resetForm, editProduct, deleteProduct, setPayment, deleteOrder, clearAllOrders, exportToCSV });
+    </script>
+</body>
+</html>

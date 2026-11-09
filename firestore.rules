@@ -1,13 +1,17 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Customer orders: anyone can submit, only the logged-in admin can view/edit/delete
     match /registrations/{id} {
-      allow create: if true;   // anyone can submit an order
-      allow read, update, delete: if true;  // TEMPORARY: admin panel has no login yet
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
     }
-    match /gallery/{id} {
-      allow read: if true;     // everyone can see the gear photos
-      allow create, update, delete: if true;  // TEMPORARY: lock to admin login later
+
+    // Products shown on the main page: everyone can view, only admin can change
+    match /products/{id} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
     }
   }
 }
