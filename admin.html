@@ -62,6 +62,7 @@
             <div class="flex gap-2 mb-6">
                 <button id="tabProducts" onclick="showTab('products')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-shirt"></i> Products</button>
                 <button id="tabOrders" onclick="showTab('orders')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-list-check"></i> Orders (<span id="orderCount">0</span>)</button>
+                <button id="tabPayment" onclick="showTab('payment')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-wallet"></i> GCash Payment</button>
             </div>
 
             <!-- ===== Products tab ===== -->
@@ -128,12 +129,34 @@
                         <thead>
                             <tr class="bg-slate-100 text-slate-700 uppercase tracking-wider font-bold">
                                 <th class="p-3">Name / Date</th><th class="p-3">Jacket</th><th class="p-3">T-Shirt</th>
-                                <th class="p-3">Fulfillment</th><th class="p-3">Total</th><th class="p-3">Payment</th><th class="p-3 text-center">Action</th>
+                                <th class="p-3">Fulfillment</th><th class="p-3">Total</th><th class="p-3">Proof of Payment</th><th class="p-3">Payment</th><th class="p-3 text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody id="ordersBody" class="divide-y divide-slate-200"></tbody>
                     </table>
                 </div>
+            </div>
+            <!-- ===== GCash payment tab ===== -->
+            <div id="paymentTab" class="hidden max-w-xl bg-white rounded-2xl shadow p-6">
+                <h2 class="font-extrabold text-slate-900 mb-1">GCash Payment Details</h2>
+                <p class="text-xs text-slate-500 mb-4">These show on the main page, above the order form.</p>
+                <form id="gcashForm" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Account Name</label>
+                        <input id="gName" required maxlength="60" placeholder="e.g. Juan D." class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">GCash Number</label>
+                        <input id="gNumber" required maxlength="20" placeholder="09XX XXX XXXX" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">QR Code Image</label>
+                        <input id="gQrFile" type="file" accept="image/*" class="mt-1 w-full text-xs">
+                        <p class="text-[11px] text-slate-500 mt-1">Leave empty to keep the current QR code.</p>
+                        <img id="gQrPreview" class="hidden mt-3 w-40 h-40 object-contain border border-slate-200 rounded-xl bg-white">
+                    </div>
+                    <button id="gSaveBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm">Save Payment Details</button>
+                </form>
             </div>
         </main>
     </div>
@@ -182,6 +205,14 @@
         </form>
     </div>
 
+    <!-- Proof of payment viewer -->
+    <div id="proofModal" onclick="closeProof()" class="fixed inset-0 bg-black/80 z-[90] hidden items-center justify-center p-4 cursor-zoom-out">
+        <div class="max-h-[92vh] max-w-full text-center">
+            <p id="proofCaption" class="text-white text-sm font-bold mb-2"></p>
+            <img id="proofImg" src="" alt="Proof of payment" class="max-h-[85vh] max-w-full rounded-xl shadow-2xl mx-auto bg-white">
+        </div>
+    </div>
+
     <!-- Toast -->
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl z-50 transition-all duration-300 translate-y-20 opacity-0">
         <h4 id="toastTitle" class="text-sm font-bold"></h4>
@@ -192,7 +223,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
             from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, getDocs, writeBatch, serverTimestamp }
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, getDocs, writeBatch, setDoc, serverTimestamp }
             from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -212,7 +243,7 @@
         const SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', 'Kids 6', 'Kids 8', 'Kids 10', 'Kids 12', 'Kids 14', 'Free Size'];
         const ADMIN_DOMAIN = '@batangpinoy.com';   // username "iss" -> iss@batangpinoy.com in Firebase Auth
 
-        let products = [], orders = [];
+        let products = [], orders = [], gcash = {};
         let editingId = null, unsubscribers = [];
 
         const $ = (id) => document.getElementById(id);
@@ -264,6 +295,13 @@
                 products = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
                 renderProducts();
             }, (e) => { console.error(e); toast('Error', 'Cannot load products. Check Firestore rules.'); }));
+            unsubscribers.push(onSnapshot(doc(db, 'settings', 'gcash'), (snap) => {
+                gcash = snap.exists() ? snap.data() : {};
+                if (document.activeElement !== $('gName') && document.activeElement !== $('gNumber')) {
+                    $('gName').value = gcash.name || ''; $('gNumber').value = gcash.number || '';
+                }
+                if (gcash.qr && !$('gQrFile').files.length) { $('gQrPreview').src = gcash.qr; $('gQrPreview').classList.remove('hidden'); }
+            }));
             unsubscribers.push(onSnapshot(query(ordersRef, orderBy('createdAt', 'asc')), (snap) => {
                 orders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
                 renderOrders();
@@ -275,6 +313,8 @@
             const on = 'bg-slate-900 text-white', off = 'bg-white text-slate-600 hover:bg-slate-200 shadow';
             $('productsTab').classList.toggle('hidden', name !== 'products');
             $('ordersTab').classList.toggle('hidden', name !== 'orders');
+            $('paymentTab').classList.toggle('hidden', name !== 'payment');
+            $('tabPayment').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'payment' ? on : off);
             $('tabProducts').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'products' ? on : off);
             $('tabOrders').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'orders' ? on : off);
         }
@@ -419,6 +459,9 @@
                     <td class="p-3">${esc(o.tshirt)}${o.backPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.backPrint)}</span>` : ''}</td>
                     <td class="p-3">${esc(o.fulfillment)}<span class="block text-[10px] text-slate-400">${esc(o.deliveryNote)}</span></td>
                     <td class="p-3 font-bold">₱${Number(o.total || 0).toLocaleString()}</td>
+                    <td class="p-3">${o.proof
+                        ? `<img src="${o.proof}" onclick="openProof('${o.docId}')" title="Click to enlarge" class="w-14 h-14 object-cover rounded-lg border border-slate-300 cursor-zoom-in hover:opacity-80">`
+                        : '<span class="text-[10px] text-slate-400">No proof</span>'}</td>
                     <td class="p-3">
                         <select onchange="setPayment('${o.docId}', this.value)" class="border rounded-md px-2 py-1 text-xs font-bold ${o.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200'}">
                             <option ${o.paymentStatus === 'Paid' ? 'selected' : ''}>Paid</option>
@@ -454,8 +497,8 @@
         function exportToCSV() {
             if (!orders.length) { alert('No data available to export.'); return; }
             const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-            let csv = 'ID,Date,Full Name,Jacket,Jacket Back Print Name,T-Shirt,T-Shirt Back Print Name,Fulfillment Method,Details,Payment Status,Total Amount (PHP)\r\n';
-            orders.forEach(o => { csv += [o.id, o.date, q(o.fullName), q(o.jacket), q(o.jacketBackPrint), q(o.tshirt), q(o.backPrint), q(o.fulfillment), q(o.deliveryNote), o.paymentStatus, o.total].join(',') + '\r\n'; });
+            let csv = 'ID,Date,Full Name,Jacket,Jacket Back Print Name,T-Shirt,T-Shirt Back Print Name,Fulfillment Method,Details,Payment Status,Proof Uploaded,Total Amount (PHP)\r\n';
+            orders.forEach(o => { csv += [o.id, o.date, q(o.fullName), q(o.jacket), q(o.jacketBackPrint), q(o.tshirt), q(o.backPrint), q(o.fulfillment), q(o.deliveryNote), o.paymentStatus, o.proof ? 'Yes' : 'No', o.total].join(',') + '\r\n'; });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
             a.download = 'Batang_Pinoy_Taekwondo_Registrations.csv';
@@ -522,7 +565,55 @@
             } finally { btn.disabled = false; btn.innerText = 'Save Changes'; }
         });
 
-        Object.assign(window, { logout, showTab, resetForm, editProduct, deleteProduct, setPayment, deleteOrder, clearAllOrders, exportToCSV, openEditOrder, closeEditOrder });
+        // ---------------- GCash payment details ----------------
+        $('gQrFile').addEventListener('change', () => {
+            const f = $('gQrFile').files[0]; if (!f) return;
+            $('gQrPreview').src = URL.createObjectURL(f); $('gQrPreview').classList.remove('hidden');
+        });
+        function compressQr(file, maxSide = 700) {
+            return new Promise((resolve, reject) => {
+                const img = new Image(); const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+                    const c = document.createElement('canvas');
+                    c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+                    const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+                    ctx.drawImage(img, 0, 0, c.width, c.height);
+                    URL.revokeObjectURL(url);
+                    resolve(c.toDataURL('image/png'));
+                };
+                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Invalid image')); };
+                img.src = url;
+            });
+        }
+        $('gcashForm').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const btn = $('gSaveBtn'); btn.disabled = true; btn.innerText = 'Saving...';
+            try {
+                const data = { name: $('gName').value.trim(), number: $('gNumber').value.trim(), qr: gcash.qr || '' };
+                const f = $('gQrFile').files[0];
+                if (f) {
+                    data.qr = await compressQr(f);
+                    if (data.qr.length > 900000) { toast('Image too large', 'Please use a smaller QR image.'); return; }
+                }
+                await setDoc(doc(db, 'settings', 'gcash'), data);
+                $('gQrFile').value = '';
+                toast('Saved', 'GCash details are now on the main page.');
+            } catch (err) {
+                console.error(err);
+                toast('Save failed', 'Check your login and Firestore rules.');
+            } finally { btn.disabled = false; btn.innerText = 'Save Payment Details'; }
+        });
+
+        function openProof(id) {
+            const o = orders.find(x => x.docId === id); if (!o || !o.proof) return;
+            $('proofImg').src = o.proof;
+            $('proofCaption').innerText = `${o.fullName} — ₱${Number(o.total || 0).toLocaleString()} (${o.id})`;
+            $('proofModal').classList.remove('hidden'); $('proofModal').classList.add('flex');
+        }
+        function closeProof() { $('proofModal').classList.add('hidden'); $('proofModal').classList.remove('flex'); }
+
+        Object.assign(window, { logout, showTab, resetForm, editProduct, deleteProduct, setPayment, deleteOrder, clearAllOrders, exportToCSV, openEditOrder, closeEditOrder, openProof, closeProof });
     </script>
 </body>
 </html>
