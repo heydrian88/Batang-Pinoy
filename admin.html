@@ -371,7 +371,7 @@
             $('ordersBody').innerHTML = orders.map(o => `
                 <tr class="hover:bg-slate-50">
                     <td class="p-3 font-semibold text-slate-800">${esc(o.fullName)}<span class="block text-[10px] text-slate-400 font-normal">${esc(o.date)} · ${esc(o.id)}</span></td>
-                    <td class="p-3">${esc(o.jacket)}</td>
+                    <td class="p-3">${esc(o.jacket)}${o.jacketBackPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.jacketBackPrint)}</span>` : ''}</td>
                     <td class="p-3">${esc(o.tshirt)}${o.backPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.backPrint)}</span>` : ''}</td>
                     <td class="p-3">${esc(o.fulfillment)}<span class="block text-[10px] text-slate-400">${esc(o.deliveryNote)}</span></td>
                     <td class="p-3 font-bold">₱${Number(o.total || 0).toLocaleString()}</td>
@@ -407,8 +407,8 @@
         function exportToCSV() {
             if (!orders.length) { alert('No data available to export.'); return; }
             const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-            let csv = 'ID,Date,Full Name,Jacket,T-Shirt,Back Print Name,Fulfillment Method,Details,Payment Status,Total Amount (PHP)\r\n';
-            orders.forEach(o => { csv += [o.id, o.date, q(o.fullName), q(o.jacket), q(o.tshirt), q(o.backPrint), q(o.fulfillment), q(o.deliveryNote), o.paymentStatus, o.total].join(',') + '\r\n'; });
+            let csv = 'ID,Date,Full Name,Jacket,Jacket Back Print Name,T-Shirt,T-Shirt Back Print Name,Fulfillment Method,Details,Payment Status,Total Amount (PHP)\r\n';
+            orders.forEach(o => { csv += [o.id, o.date, q(o.fullName), q(o.jacket), q(o.jacketBackPrint), q(o.tshirt), q(o.backPrint), q(o.fulfillment), q(o.deliveryNote), o.paymentStatus, o.total].join(',') + '\r\n'; });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
             a.download = 'Batang_Pinoy_Taekwondo_Registrations.csv';

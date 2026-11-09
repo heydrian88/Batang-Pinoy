@@ -183,6 +183,13 @@
                                 <option value="2XL">2XL</option>
                                 <option value="3XL">3XL</option>
                             </select>
+
+                            <label for="jacketBackPrint" class="block text-xs font-semibold text-slate-700 mt-4 mb-1">
+                                Back Print Name (Surname / Name) <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="jacketBackPrint" maxlength="20" autocomplete="off" placeholder="e.g., DELA CRUZ"
+                                class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm uppercase focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                            <p class="text-[11px] text-slate-500 mt-1">This will be printed on the back of your jacket (max 20 characters). Please double-check the spelling.</p>
                         </div>
                     </div>
 
@@ -310,7 +317,7 @@
                 </div>
                 <div class="border border-slate-200 rounded-xl divide-y divide-slate-200">
                     <div id="rcJacketRow" class="flex justify-between p-3">
-                        <div><p class="font-bold text-slate-900">Team Jacket</p><p id="rcJacketSize" class="text-xs text-slate-500"></p></div>
+                        <div><p class="font-bold text-slate-900">Team Jacket</p><p id="rcJacketSize" class="text-xs text-slate-500"></p><p id="rcJacketBackPrint" class="text-xs text-taekwondo-blue font-bold"></p></div>
                         <span class="font-bold">₱1,100</span>
                     </div>
                     <div id="rcTshirtRow" class="flex justify-between p-3">
@@ -390,16 +397,20 @@
             const checkbox = document.getElementById('buyJacket');
             const container = document.getElementById('jacketSizeContainer');
             const select = document.getElementById('jacketSize');
+            const jBack = document.getElementById('jacketBackPrint');
             const card = document.getElementById('jacketCard');
 
             if (checkbox.checked) {
                 container.classList.remove('opacity-40', 'pointer-events-none');
                 select.setAttribute('required', 'true');
+                jBack.setAttribute('required', 'true');
                 card.classList.add('border-taekwondo-blue', 'bg-white', 'shadow-sm');
             } else {
                 container.classList.add('opacity-40', 'pointer-events-none');
                 select.removeAttribute('required');
                 select.value = '';
+                jBack.removeAttribute('required');
+                jBack.value = '';
                 card.classList.remove('border-taekwondo-blue', 'bg-white', 'shadow-sm');
             }
             updateCalculation();
@@ -473,6 +484,7 @@
             const fullName = document.getElementById('fullName').value.trim();
             const jacketSize = buyJacket ? document.getElementById('jacketSize').value : 'N/A';
             const tshirtSize = buyTshirt ? document.getElementById('tshirtSize').value : 'N/A';
+            const jacketBackPrint = buyJacket ? document.getElementById('jacketBackPrint').value.trim().toUpperCase() : '';
             const backPrint = buyTshirt ? document.getElementById('backPrint').value.trim().toUpperCase() : '';
             const fulfillment = document.querySelector('input[name="fulfillment"]:checked').value;
             const deliveryNote = fulfillment === 'Delivery' ? 'Delivery (Contact 09620485439)' : 'Store Pickup (KALOSph)';
@@ -488,6 +500,7 @@
                 fullName,
                 jacket: buyJacket ? `Yes (${jacketSize})` : 'No',
                 tshirt: buyTshirt ? `Yes (${tshirtSize})` : 'No',
+                jacketBackPrint,
                 backPrint,
                 fulfillment,
                 deliveryNote,
@@ -512,11 +525,11 @@
             updateCalculation();
 
             showToast('Registration Successful!', `${fullName}, your gear order has been recorded.`);
-            showReceipt(record, backPrint, jacketSize, tshirtSize);
+            showReceipt(record, backPrint, jacketSize, tshirtSize, jacketBackPrint);
         }
 
         // Show the customer a summary of what they just submitted
-        function showReceipt(r, backPrint, jacketSize, tshirtSize) {
+        function showReceipt(r, backPrint, jacketSize, tshirtSize, jacketBackPrint) {
             const set = (id, v) => { document.getElementById(id).innerText = v; };
             set('rcId', r.id);
             set('rcDate', r.date);
@@ -528,6 +541,7 @@
             document.getElementById('rcJacketRow').classList.toggle('hidden', !hasJacket);
             document.getElementById('rcTshirtRow').classList.toggle('hidden', !hasTshirt);
             set('rcJacketSize', 'Size: ' + jacketSize);
+            set('rcJacketBackPrint', jacketBackPrint ? 'Back print: ' + jacketBackPrint : '');
             set('rcTshirtSize', 'Size: ' + tshirtSize);
             set('rcBackPrint', backPrint ? 'Back print: ' + backPrint : '');
             const m = document.getElementById('receiptModal');
