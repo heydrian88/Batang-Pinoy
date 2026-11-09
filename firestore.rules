@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /registrations/{id} {
+      allow create: if true;   // anyone can submit an order
+      allow read, update, delete: if true;  // TEMPORARY: admin panel has no login yet
+    }
+    match /gallery/{id} {
+      allow read: if true;     // everyone can see the gear photos
+      allow create, update, delete: if true;  // TEMPORARY: lock to admin login later
+    }
+  }
+}
