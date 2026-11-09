@@ -188,7 +188,7 @@
             const err = $('loginError'); err.classList.add('hidden');
             $('loginBtn').disabled = true; $('loginBtn').innerText = 'Logging in...';
             try {
-                await signInWithEmailAndPassword(auth, user + ADMIN_DOMAIN, pass);
+                await signInWithEmailAndPassword(auth, user.includes('@') ? user : user + ADMIN_DOMAIN, pass);
             } catch (ex) {
                 console.error(ex);
                 err.innerText = ['auth/invalid-credential', 'auth/wrong-password', 'auth/user-not-found', 'auth/invalid-email'].includes(ex.code)

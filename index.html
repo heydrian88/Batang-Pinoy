@@ -61,6 +61,9 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
+                <button onclick="openMySubmissions()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold px-4 py-2.5 rounded-lg transition flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-users-gear"></i> View Submissions (<span id="mySubCount">0</span>)
+                </button>
                 <button onclick="scrollToForm()" class="bg-taekwondo-red hover:bg-red-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow-lg flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square"></i> Register Now
                 </button>
@@ -298,6 +301,23 @@
         <img id="lightboxImg" src="" alt="" class="max-h-[90vh] max-w-full rounded-xl shadow-2xl">
     </div>
 
+    <!-- My Submissions Modal (this device only) -->
+    <div id="mySubModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[65] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-list-check text-taekwondo-accent"></i> My Submissions</h3>
+                    <p class="text-xs text-slate-400">Your registrations submitted from this device.</p>
+                </div>
+                <button onclick="closeMySubmissions()" class="text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="mySubBody" class="p-5 overflow-y-auto flex-grow space-y-3 bg-slate-50"></div>
+            <div class="px-6 py-3 border-t border-slate-200 text-[11px] text-slate-500">
+                Payment status shown is what you selected when you submitted. Contact KALOSph Las Piñas (09620485439) for payment confirmation.
+            </div>
+        </div>
+    </div>
+
     <!-- Order Receipt / Submission Summary -->
     <div id="receiptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] hidden items-center justify-center p-4">
         <div id="receiptCard" class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto">
@@ -382,10 +402,12 @@
         const registrationsRef = collection(db, 'registrations');
 
         // Prices
+        const MY_KEY = 'batang_pinoy_my_submissions_2026';
         const PRICE_JACKET = 1100;
         const PRICE_TSHIRT = 500;
 
         updateCalculation();
+        updateMyCount();
 
         // Scroll to form helper
         function scrollToForm() {
@@ -517,6 +539,9 @@
                 return;
             }
 
+            // Keep a copy on this device so the customer can see it under "View Submissions"
+            saveMine(record);
+
             // Reset Form
             document.getElementById('gearForm').reset();
             toggleJacketOptions();
@@ -550,7 +575,7 @@
         function closeReceipt() {
             const m = document.getElementById('receiptModal');
             m.classList.add('hidden'); m.classList.remove('flex');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            openMySubmissions();
         }
 
         // Toast Notification Helper
@@ -629,9 +654,50 @@
             lb.classList.add('hidden'); lb.classList.remove('flex');
         }
 
+        // ---------- My Submissions (stored on this device only) ----------
+        function loadMine() {
+            try { return JSON.parse(localStorage.getItem(MY_KEY)) || []; } catch (e) { return []; }
+        }
+        function saveMine(record) {
+            const list = loadMine(); list.push(record);
+            try { localStorage.setItem(MY_KEY, JSON.stringify(list)); } catch (e) { console.warn(e); }
+            updateMyCount();
+        }
+        function updateMyCount() {
+            document.getElementById('mySubCount').innerText = loadMine().length;
+        }
+        function openMySubmissions() {
+            const list = loadMine().slice().reverse();
+            const e = (t) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            document.getElementById('mySubBody').innerHTML = list.length ? list.map(r => `
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2 text-sm">
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <p class="font-extrabold text-slate-900">${e(r.fullName)}</p>
+                            <p class="text-[11px] text-slate-400">${e(r.id)} · ${e(r.date)}</p>
+                        </div>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded ${r.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${e(r.paymentStatus)}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-slate-50 rounded-lg p-2.5"><span class="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">Jacket</span>
+                            ${e(r.jacket)}${r.jacketBackPrint ? `<span class="block text-taekwondo-blue font-bold">Back: ${e(r.jacketBackPrint)}</span>` : ''}</div>
+                        <div class="bg-slate-50 rounded-lg p-2.5"><span class="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">T-Shirt</span>
+                            ${e(r.tshirt)}${r.backPrint ? `<span class="block text-taekwondo-blue font-bold">Back: ${e(r.backPrint)}</span>` : ''}</div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>${e(r.deliveryNote)}</span>
+                        <span class="font-black text-taekwondo-blue text-sm">₱${Number(r.total || 0).toLocaleString()}</span>
+                    </div>
+                </div>`).join('') : '<div class="text-center py-12 text-sm text-slate-500">No submissions yet from this device.</div>';
+            const m = document.getElementById('mySubModal'); m.classList.remove('hidden'); m.classList.add('flex');
+        }
+        function closeMySubmissions() {
+            const m = document.getElementById('mySubModal'); m.classList.add('hidden'); m.classList.remove('flex');
+        }
+
         Object.assign(window, {
             scrollToForm, toggleJacketOptions, toggleTshirtOptions, toggleFulfillment,
-            handleFormSubmit, closeReceipt, swapImage, openLightbox, closeLightbox
+            handleFormSubmit, closeReceipt, openMySubmissions, closeMySubmissions, swapImage, openLightbox, closeLightbox
         });
     </script>
 </body>
