@@ -1,775 +1,588 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full scroll-smooth">
+<html lang="en" class="h-full">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kamana Sanctuary Resort & Spa - Executive ERP Proposal & Strategy</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- Google Fonts: Inter & Playfair Display -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
-
-  <!-- PptxGenJS CDN for instant PowerPoint generation -->
-  <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              navy: '#0F172A',
-              dark: '#1E293B',
-              card: '#1E293B',
-              border: '#334155',
-              gold: '#D4AF37',
-              goldHover: '#B59226',
-              goldLight: '#E5C158',
-              accent: '#38BDF8',
-              teal: '#0284C7'
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batang Pinoy Taekwondo Jacket & T-Shirt Registration</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        taekwondo: {
+                            blue: '#0047AB',
+                            red: '#E31B23',
+                            dark: '#0F172A',
+                            accent: '#F59E0B'
+                        }
+                    }
+                }
             }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            serif: ['Playfair Display', 'serif']
-          }
         }
-      }
-    }
-  </script>
-
-  <style>
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0F172A;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #0284C7;
-    }
-    
-    .glass-card {
-      background: rgba(30, 41, 59, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    }
-
-    .hero-bg {
-      background-image: 
-        linear-gradient(to bottom, rgba(15, 23, 42, 0.70), rgba(15, 23, 42, 0.90)),
-        url("https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1920&q=80");
-      background-size: cover;
-      background-position: center;
-    }
-  </style>
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-pattern {
+            background-color: #0F172A;
+            background-image: radial-gradient(#1E293B 1px, transparent 1px), radial-gradient(#1E293B 1px, #0F172A 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+    </style>
 </head>
-<body class="bg-brand-navy text-slate-100 font-sans min-h-screen flex flex-col justify-between hero-bg antialiased selection:bg-sky-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 min-h-full flex flex-col justify-between">
 
-  <!-- TOP EXECUTIVE NAVIGATION BAR -->
-  <header class="bg-brand-navy/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3 sm:px-8 flex items-center justify-between shadow-xl">
-    <div class="flex items-center space-x-3 cursor-pointer" onclick="goToSlide(1)">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg">
-        <i class="fa-solid fa-umbrella-beach text-white text-lg"></i>
-      </div>
-      <div>
-        <h1 class="font-serif font-bold text-slate-100 text-sm sm:text-base tracking-wide flex items-center gap-2">
-          Kamana Sanctuary Resort & Spa
-          <span class="text-[10px] font-sans font-bold uppercase px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30">Executive Proposal</span>
-        </h1>
-        <p class="text-xs text-slate-400 font-medium hidden sm:block">Integrated Resort Operations & ERP Systems Strategy</p>
-      </div>
-    </div>
-
-    <!-- Right Controls -->
-    <div class="flex items-center space-x-2 sm:space-x-3">
-      <button onclick="toggleRoiCalculatorModal()" title="Open Interactive ROI Calculator" class="px-3 py-1.5 rounded-lg bg-emerald-950/70 hover:bg-emerald-900/90 text-emerald-300 text-xs sm:text-sm font-semibold border border-emerald-600/40 flex items-center gap-2 transition shadow-sm">
-        <i class="fa-solid fa-calculator text-emerald-400"></i>
-        <span class="hidden md:inline">ROI Calculator</span>
-      </button>
-
-      <button onclick="downloadPowerPoint()" title="Download Presentation as .pptx" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold shadow-md flex items-center gap-2 transition">
-        <i class="fa-solid fa-file-powerpoint"></i>
-        <span>Download .pptx</span>
-      </button>
-
-      <button onclick="toggleSlideOverview()" title="Slide Overview Grid" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-medium border border-slate-700 flex items-center gap-2 transition">
-        <i class="fa-solid fa-table-cells text-sky-400"></i>
-        <span class="hidden sm:inline">Slides</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- MAIN PRESENTATION CANVAS -->
-  <main class="flex-1 flex flex-col justify-center items-center p-3 sm:p-6 md:p-8 max-w-7xl w-full mx-auto relative my-2">
-
-    <!-- PROGRESS INDICATOR -->
-    <div class="w-full bg-slate-800/80 h-1.5 rounded-full mb-4 overflow-hidden shadow-inner">
-      <div id="progressBar" class="bg-gradient-to-r from-sky-400 via-blue-500 to-emerald-400 h-full transition-all duration-300" style="width: 12.5%;"></div>
-    </div>
-
-    <!-- SLIDES WRAPPER -->
-    <div class="w-full relative min-h-[580px] sm:min-h-[620px] flex items-center justify-center">
-
-      <!-- SLIDE 1: HOME COVER -->
-      <section id="slide-1" class="slide-card w-full glass-card rounded-2xl p-6 sm:p-10 border border-slate-700/60 shadow-2xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-700/60 pb-6">
-          <div>
-            <span class="text-xs font-semibold text-sky-400 tracking-widest uppercase">Proposal Cover • Slide 1 of 8</span>
-            <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white mt-1 leading-tight">Resort Operations & ERP Transformation</h2>
-          </div>
-          <div class="bg-slate-900/90 px-4 py-2.5 rounded-xl border border-sky-500/30 flex items-center gap-3">
-            <i class="fa-solid fa-user-tie text-sky-400 text-2xl"></i>
-            <div>
-              <div class="text-[10px] text-slate-400 uppercase tracking-wider">Candidate Proposal</div>
-              <div class="text-sm font-bold text-slate-100">Ops Manager & Systems Developer</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div class="lg:col-span-7 space-y-6">
-            <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-700/80">
-              <h3 class="text-lg font-bold text-sky-400 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-compass"></i> Unified Executive Strategic Vision
-              </h3>
-              <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-                Combine high-level resort operations leadership with tailored, in-house operational software development. One unified leadership role delivering direct operational accountability and targeted custom ERP technology built specifically for Kamana Sanctuary Resort & Spa.
-              </p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800">
-                <i class="fa-solid fa-sitemap text-sky-400 text-xl mb-2"></i>
-                <h4 class="text-sm font-bold text-white mb-1">Standardized SOPs</h4>
-                <p class="text-xs text-slate-400">Enforce uniform department workflows & staff compliance.</p>
-              </div>
-              <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800">
-                <i class="fa-solid fa-boxes-packing text-emerald-400 text-xl mb-2"></i>
-                <h4 class="text-sm font-bold text-white mb-1">Procurement Control</h4>
-                <p class="text-xs text-slate-400">Tighten purchasing approvals, inventory counts & audit controls.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Column: Proposed Compensation & Investment -->
-          <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 via-slate-900 to-sky-950/40 p-6 rounded-2xl border border-sky-500/30 shadow-2xl space-y-6">
-            <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider border-b border-slate-800 pb-3">Proposed Staffing & Investment</h3>
-            
-            <div class="space-y-4">
-              <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+    <!-- Header / Navbar -->
+    <header class="hero-pattern text-white shadow-lg border-b-4 border-taekwondo-red">
+        <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-taekwondo-red p-3 rounded-xl shadow-md text-white text-2xl font-black">
+                    <i class="fa-solid fa-medal"></i>
+                </div>
                 <div>
-                  <div class="font-bold text-white text-sm sm:text-base">Operations Manager & Developer</div>
-                  <div class="text-xs text-slate-400">Dual-Role Leadership & Architecture</div>
+                    <span class="text-xs uppercase tracking-widest text-taekwondo-accent font-bold">Official Team Gear</span>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Batang Pinoy Taekwondo</h1>
                 </div>
-                <div class="text-right">
-                  <span class="text-lg font-extrabold text-sky-400">₱80,000</span>
-                  <span class="text-[10px] text-slate-400 block">/mo gross</span>
-                </div>
-              </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="openAdminModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold px-4 py-2.5 rounded-lg transition flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-users-gear"></i> View Submissions (<span id="submissionCount">0</span>)
+                </button>
+                <button onclick="scrollToForm()" class="bg-taekwondo-red hover:bg-red-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow-lg flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Register Now
+                </button>
+            </div>
+        </div>
+    </header>
 
-              <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8 space-y-8">
+
+        <!-- Important Disclaimer Banner / Card -->
+        <section class="bg-amber-50 border-l-4 border-amber-500 rounded-2xl p-6 shadow-md relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 text-amber-100 opacity-50 text-9xl pointer-events-none">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="flex items-start space-x-4 relative z-10">
+                <div class="bg-amber-500 text-white p-3 rounded-xl mt-1 shadow">
+                    <i class="fa-solid fa-circle-exclamation text-xl"></i>
+                </div>
+                <div class="space-y-3 flex-1">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <h2 class="text-lg font-bold text-amber-900">Important Reminders & Guidelines</h2>
+                        <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full w-fit">
+                            <i class="fa-regular fa-clock"></i> Deadline: Nov 11, 2026
+                        </span>
+                    </div>
+                    <ul class="text-sm text-amber-900/90 space-y-2 list-disc list-inside leading-relaxed">
+                        <li><strong>Payment Deadline:</strong> November 11, 2026 (Wednesday). Please settle payments on or before this date.</li>
+                        <li><strong>Production Lead Time:</strong> Approximately 12–15 days (excluding Sundays and holidays).</li>
+                        <li><strong>At-Cost Pricing:</strong> No markup has been added to the prices. This is strictly to help our team look more presentable, uniform, and professional.</li>
+                        <li><strong>Fulfillment & Delivery:</strong> Delivery fee is shouldered individually by each person, OR you may opt for direct store pickup.</li>
+                        <li>
+                            <strong>Supplier Details:</strong> <span class="font-semibold text-amber-950">KALOSph Las Piñas</span><br>
+                            <span class="text-xs text-amber-900/80 ml-5 block mt-0.5">
+                                <i class="fa-solid fa-phone text-amber-700"></i> Contact: 09620485439 &nbsp;|&nbsp; 
+                                <i class="fa-solid fa-location-dot text-amber-700"></i> Address: #17 Las Piñas Commercial Complex, Talon Uno Las Piñas City. 
+                                (<a href="https://maps.google.com/?q=KALOSph+Las+Piñas" target="_blank" class="text-blue-700 underline font-semibold hover:text-blue-900">Google Maps</a>)
+                            </span>
+                        </li>
+                    </ul>
+                    <p class="text-xs text-amber-800 italic pt-1 font-medium">Thank you for your support and cooperation!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Registration Form Section -->
+        <section id="registrationFormSection" class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
                 <div>
-                  <div class="font-bold text-white text-sm sm:text-base">Assistant Systems Developer</div>
-                  <div class="text-xs text-slate-400">Technical Support & QA Testing</div>
+                    <h3 class="font-bold text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-shirt text-taekwondo-accent"></i> Gear Order & Registration Form
+                    </h3>
+                    <p class="text-xs text-slate-400">Fill out the details below to reserve your team jacket and/or t-shirt.</p>
                 </div>
-                <div class="text-right">
-                  <span class="text-lg font-extrabold text-slate-200">₱25k–₱30k</span>
-                  <span class="text-[10px] text-slate-400 block">/mo gross</span>
+                <div class="text-right hidden sm:block">
+                    <span class="text-xs text-slate-400 block">Estimated Total</span>
+                    <span id="headerTotal" class="text-xl font-black text-taekwondo-accent">₱0.00</span>
                 </div>
-              </div>
+            </div>
 
-              <div class="bg-emerald-950/60 p-4 rounded-xl border border-emerald-500/30 flex items-center justify-between">
+            <form id="gearForm" onsubmit="handleFormSubmit(event)" class="p-6 md:p-8 space-y-6">
+                
+                <!-- Full Name -->
                 <div>
-                  <span class="text-xs font-bold text-emerald-300 block">Total Combined Monthly</span>
-                  <span class="text-[10px] text-emerald-400">Covers both operations & custom dev</span>
+                    <label for="fullName" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Full Name <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="fullName" required placeholder="e.g., Juan Dela Cruz" 
+                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-taekwondo-blue focus:border-transparent text-sm transition">
+                    </div>
                 </div>
-                <span class="text-base font-black text-emerald-300">₱105k – ₱110k</span>
-              </div>
+
+                <!-- Product Selection Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    
+                    <!-- Jacket Card -->
+                    <div class="border-2 border-slate-200 rounded-2xl p-5 flex flex-col justify-between transition hover:border-taekwondo-blue bg-slate-50/50" id="jacketCard">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="buyJacket" onchange="toggleJacketOptions()" 
+                                        class="w-5 h-5 text-taekwondo-blue rounded border-slate-300 focus:ring-taekwondo-blue">
+                                    <span class="font-bold text-slate-900 text-base">Purchase Team Jacket</span>
+                                </label>
+                                <span class="bg-blue-100 text-taekwondo-blue text-xs font-black px-2.5 py-1 rounded-lg">₱1,100</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4">Official Batang Pinoy Taekwondo premium uniform jacket.</p>
+                        </div>
+                        
+                        <div id="jacketSizeContainer" class="opacity-40 pointer-events-none transition-all">
+                            <label for="jacketSize" class="block text-xs font-semibold text-slate-700 mb-1">
+                                Select Jacket Size <span class="text-red-500">*</span>
+                            </label>
+                            <select id="jacketSize" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                                <option value="">-- Choose Size --</option>
+                                <option value="S">S</option>
+                                <option value="M">M</option>
+                                <option value="L">L</option>
+                                <option value="XL">XL</option>
+                                <option value="2XL">2XL</option>
+                                <option value="3XL">3XL</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- T-Shirt Card -->
+                    <div class="border-2 border-slate-200 rounded-2xl p-5 flex flex-col justify-between transition hover:border-taekwondo-blue bg-slate-50/50" id="tshirtCard">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="buyTshirt" onchange="toggleTshirtOptions()" 
+                                        class="w-5 h-5 text-taekwondo-blue rounded border-slate-300 focus:ring-taekwondo-blue">
+                                    <span class="font-bold text-slate-900 text-base">Purchase T-Shirt</span>
+                                </label>
+                                <span class="bg-red-100 text-taekwondo-red text-xs font-black px-2.5 py-1 rounded-lg">₱500</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4">Official breathable team training t-shirt.</p>
+                        </div>
+                        
+                        <div id="tshirtSizeContainer" class="opacity-40 pointer-events-none transition-all">
+                            <label for="tshirtSize" class="block text-xs font-semibold text-slate-700 mb-1">
+                                Select T-Shirt Size <span class="text-red-500">*</span>
+                            </label>
+                            <select id="tshirtSize" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                                <option value="">-- Choose Size --</option>
+                                <option value="S">S</option>
+                                <option value="M">M</option>
+                                <option value="L">L</option>
+                                <option value="XL">XL</option>
+                                <option value="2XL">2XL</option>
+                                <option value="3XL">3XL</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Fulfillment & Address Section -->
+                <div class="space-y-4 pt-2">
+                    <label class="block text-sm font-semibold text-slate-700">
+                        Fulfillment Method <span class="text-red-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <label class="border-2 border-slate-200 rounded-xl p-4 flex items-center space-x-3 cursor-pointer hover:border-taekwondo-blue transition bg-slate-50/50">
+                            <input type="radio" name="fulfillment" value="Delivery" checked onchange="toggleFulfillment()" class="w-4 h-4 text-taekwondo-blue focus:ring-taekwondo-blue">
+                            <div>
+                                <span class="block font-bold text-sm text-slate-800">Delivery</span>
+                                <span class="block text-xs text-slate-500">Shouldered individually / courier</span>
+                            </div>
+                        </label>
+                        <label class="border-2 border-slate-200 rounded-xl p-4 flex items-center space-x-3 cursor-pointer hover:border-taekwondo-blue transition bg-slate-50/50">
+                            <input type="radio" name="fulfillment" value="Store Pickup" onchange="toggleFulfillment()" class="w-4 h-4 text-taekwondo-blue focus:ring-taekwondo-blue">
+                            <div>
+                                <span class="block font-bold text-sm text-slate-800">Store Pickup</span>
+                                <span class="block text-xs text-slate-500">Pick up at KALOSph Las Piñas</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Delivery Note Container -->
+                    <div id="addressContainer" class="pt-1">
+                        <p class="text-xs text-slate-600 bg-slate-100 p-3 rounded-xl border border-slate-200 flex items-start gap-2">
+                            <i class="fa-solid fa-circle-info text-taekwondo-blue mt-0.5"></i>
+                            <span>For delivery, each individual would contact KALOSph Las Piñas at <strong class="text-slate-900">09620485439</strong> to arrange courier details and fee payment.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Payment Status -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                    <div>
+                        <label for="paymentStatus" class="block text-sm font-semibold text-slate-700 mb-1">
+                            Payment Status <span class="text-red-500">*</span>
+                        </label>
+                        <select id="paymentStatus" class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                            <option value="Pending">Pending (Deadline: Nov 11, 2026)</option>
+                            <option value="Paid">Paid</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col justify-end">
+                        <div class="bg-slate-100 rounded-xl p-4 flex items-center justify-between">
+                            <span class="text-sm font-semibold text-slate-600">Total Amount:</span>
+                            <span id="calculatedTotal" class="text-xl font-black text-taekwondo-blue">₱0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-taekwondo-blue hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-base">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Registration & Order
+                    </button>
+                </div>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- Admin Submissions Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-taekwondo-accent"></i> Registration Submissions
+                    </h3>
+                    <p class="text-xs text-slate-400">View and manage all registered orders for team uniforms.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-file-excel"></i> Export CSV
+                    </button>
+                    <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white p-2 rounded-lg transition">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
             </div>
 
-            <button onclick="goToSlide(2)" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition">
-              <span>Explore ERP Architecture Flow</span>
-              <i class="fa-solid fa-arrow-right"></i>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 2: INTEGRATED ERP ARCHITECTURE DIAGRAM -->
-      <section id="slide-2" class="slide-card hidden w-full glass-card rounded-2xl p-6 sm:p-10 border border-slate-700/60 shadow-2xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-700/60 pb-4">
-          <div>
-            <span class="text-xs font-semibold text-sky-400 tracking-widest uppercase">Slide 2 of 8 • Architecture Flow</span>
-            <h2 class="text-2xl sm:text-4xl font-serif font-bold text-white mt-1">Integrated ERP Architecture</h2>
-          </div>
-          <span class="px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-semibold">
-            Central Hub & Departmental Sync
-          </span>
-        </div>
-
-        <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-800 shadow-inner flex flex-col items-center justify-center">
-          <img src="https://lh3.googleusercontent.com/gg/AJWXcNc60uHXTOBlX7D5-xXMZZq24xV5UcbmqWX9jPjMNzpg56_TOskvu1nEto1o84o1f_uAvqGbwgXw5vn3bYRAq9oWxa9hnXus9_IAQ3d2mhpNR0bOpLu4M4cjmpG8lK3q4Zv6zEDDFDTwbzq5viithlyUjmXunrJovIHr9bcZJj7NuvvM6Gg8kpsmU8aj86clZenUKBeCOkU05_MAcoQIRqzJEZQ_99GIi-3Ng8cEReSqYIEwFMsZPhhUxtYZ2l9trlI36eDVLSVnE5glKm5HL1Jf5G7Zx5jpyw" alt="Kamana Sanctuary Resort Integrated ERP Architecture" class="max-h-[440px] w-auto max-w-full object-contain rounded-xl shadow-lg border border-slate-700/50">
-        </div>
-
-        <div class="mt-4 flex justify-between items-center text-xs text-slate-400">
-          <span><i class="fa-solid fa-circle-info text-sky-400 mr-1.5"></i> Streamlined operations, real-time data flow, and unified resort ecosystem.</span>
-          <button onclick="goToSlide(3)" class="text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1">
-            <span>Next: Candidate Fit</span>
-            <i class="fa-solid fa-chevron-right text-xs"></i>
-          </button>
-        </div>
-      </section>
-
-      <!-- SLIDE 3: CANDIDATE FIT & QUALIFICATIONS -->
-      <section id="slide-3" class="slide-card hidden w-full glass-card rounded-2xl p-6 sm:p-10 border border-slate-700/60 shadow-2xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-700/60 pb-6">
-          <div>
-            <span class="text-xs font-semibold text-sky-400 tracking-widest uppercase">Qualifications • Slide 3 of 8</span>
-            <h2 class="text-2xl sm:text-4xl font-serif font-bold text-white mt-1">Candidate Background & Fit</h2>
-          </div>
-          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-semibold">
-            Operations-Led Systems Developer
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div class="bg-slate-900/80 p-6 rounded-xl border border-slate-800 hover:border-sky-500/50 transition">
-            <div class="text-3xl font-extrabold text-sky-400 mb-1">10 Years</div>
-            <h3 class="text-base font-bold text-white mb-2">Retail Operations Mgmt</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Proven track record in service standards, staff coordination, strict SOP compliance, and internal audit controls.
-            </p>
-          </div>
-
-          <div class="bg-slate-900/80 p-6 rounded-xl border border-slate-800 hover:border-sky-500/50 transition">
-            <div class="text-3xl font-extrabold text-blue-400 mb-1">5 Years</div>
-            <h3 class="text-base font-bold text-white mb-2">Purchasing Management</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Direct experience in procurement workflows, vendor negotiations, stock balances, and variance audits.
-            </p>
-          </div>
-
-          <div class="bg-slate-900/80 p-6 rounded-xl border border-slate-800 hover:border-sky-500/50 transition">
-            <div class="text-3xl font-extrabold text-emerald-400 mb-1">Full-Stack</div>
-            <h3 class="text-base font-bold text-white mb-2">Systems Development</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Translating operational friction into functional database code and guiding staff through seamless onboarding.
-            </p>
-          </div>
-        </div>
-
-        <div class="bg-gradient-to-r from-sky-950/50 via-slate-900 to-slate-900 p-6 rounded-xl border border-sky-500/40">
-          <div class="flex items-start gap-4">
-            <div class="p-3 bg-sky-500/20 text-sky-400 rounded-xl text-2xl font-bold">
-              <i class="fa-solid fa-lightbulb"></i>
+            <!-- Modal Footer -->
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                <span id="modalSummaryText">Total Entries: 0</span>
+                <button onclick="clearAllData()" class="text-red-600 hover:text-red-800 font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-trash-can"></i> Reset All Data
+                </button>
             </div>
-            <div>
-              <h3 class="text-base font-bold text-white mb-1">The Key Value Differentiator</h3>
-              <p class="text-sm text-slate-300 leading-relaxed">
-                <strong class="text-sky-400">Connecting operational problems to technical solutions:</strong> In this dual role, I determine <i>what</i> should be built, <i>why</i> it drives resort efficiency, and <i>how</i> floor staff will effortlessly adopt it without relying on external third-party software companies.
-              </p>
-            </div>
-          </div>
         </div>
-      </section>
-
-      <!-- SLIDE 4: PROPOSED ERP MODULES -->
-      <section id="slide-4" class="slide-card hidden w-full glass-card rounded-2xl p-6 sm:p-10 border border-slate-700/60 shadow-2xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-700/60 pb-4">
-          <div>
-            <span class="text-xs font-semibold text-sky-400 tracking-widest uppercase">System Scope • Slide 4 of 8</span>
-            <h2 class="text-2xl sm:text-4xl font-serif font-bold text-white mt-1">Proposed ERP Scope (Phase 1)</h2>
-          </div>
-          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs">Custom Tailored Modules</span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 text-center">
-            <i class="fa-solid fa-broom text-sky-400 text-2xl mb-3"></i>
-            <h3 class="text-sm font-bold text-white mb-1">Housekeeping</h3>
-            <p class="text-xs text-slate-400">Room readiness, turnover logs, inspection checklists.</p>
-          </div>
-
-          <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 text-center">
-            <i class="fa-solid fa-wrench text-blue-400 text-2xl mb-3"></i>
-            <h3 class="text-sm font-bold text-white mb-1">Engineering</h3>
-            <p class="text-xs text-slate-400">Work order tickets, priority repair logs, spare parts.</p>
-          </div>
-
-          <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 text-center">
-            <i class="fa-solid fa-concierge-bell text-indigo-400 text-2xl mb-3"></i>
-            <h3 class="text-sm font-bold text-white mb-1">Front Desk</h3>
-            <p class="text-xs text-slate-400">Room availability, check-in status, shift handovers.</p>
-          </div>
-
-          <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 text-center">
-            <i class="fa-solid fa-cart-shopping text-emerald-400 text-2xl mb-3"></i>
-            <h3 class="text-sm font-bold text-white mb-1">Purchasing</h3>
-            <p class="text-xs text-slate-400">PR approvals, PO issuance, store receiving logs.</p>
-          </div>
-
-          <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 text-center">
-            <i class="fa-solid fa-utensils text-rose-400 text-2xl mb-3"></i>
-            <h3 class="text-sm font-bold text-white mb-1">Sales & F&B</h3>
-            <p class="text-xs text-slate-400">Outlet requisitions, recipe inputs, stock balances.</p>
-          </div>
-        </div>
-
-        <div class="bg-amber-950/30 p-5 rounded-xl border border-amber-500/30">
-          <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-2">
-            <i class="fa-solid fa-shield-halved"></i> Initial Scope Boundaries (Phase 1 Exclusions)
-          </h4>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Phase 1 excludes full accounting ledgers, BIR tax reporting, automated payroll processing, and direct online payment gateways to focus strictly on rapid operational efficiency and zero disruption.
-          </p>
-        </div>
-      </section>
-
-      <!-- SLIDE 5: FINANCIAL & SALARY COMPARISON -->
-      <section id="slide-5" class="slide-card hidden w-full glass-card rounded-2xl p-6 sm:p-10 border border-slate-700/60 shadow-2xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-700/60 pb-4">
-          <div>
-            <span class="text-xs font-semibold text-sky-400 tracking-widest uppercase">Financial Strategy • Slide 5 of 8</span>
-            <h2 class="text-2xl sm:text-4xl font-serif font-bold text-white mt-1">Salary & Investment Comparison</h2>
-          </div>
-          <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold">
-            Cost Benchmark
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          <div class="lg:col-span-8 overflow-x-auto">
-            <table class="w-full text-xs text-left border-collapse">
-              <thead>
-                <tr class="bg-slate-900 text-sky-400 border-b border-slate-700">
-                  <th class="p-3 font-bold">Staffing / System Model</th>
-                  <th class="p-3 font-bold">Monthly Cost</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-800 text-slate-300">
-                <tr>
-                  <td class="p-3">Ops Manager + Software Dev (2 Separate Hires)</td>
-                  <td class="p-3 font-semibold text-slate-200">₱125,000 – ₱155,000</td>
-                </tr>
-                <tr>
-                  <td class="p-3">Third-Party Vendor ERP SaaS License Fee</td>
-                  <td class="p-3 font-semibold text-slate-200">₱40,000 – ₱60,000</td>
-                </tr>
-                <tr class="bg-rose-950/20 text-rose-300 font-bold">
-                  <td class="p-3">Option A: 2 Hires + External Vendor ERP Software</td>
-                  <td class="p-3 text-rose-400">₱165,000 – ₱215,000 / mo</td>
-                </tr>
-                <tr class="text-sky-300 font-bold">
-                  <td class="p-3">Proposed Dual Role (Ops Manager & Systems Developer)</td>
-                  <td class="p-3 text-sky-400">₱80,000 / mo</td>
-                </tr>
-                <tr>
-                  <td class="p-3">Assistant Developer Support</td>
-                  <td class="p-3 font-semibold text-slate-200">₱25,000 – ₱30,000</td>
-                </tr>
-                <tr class="bg-emerald-950/30 text-emerald-300 font-extrabold border-t border-emerald-800/50">
-                  <td class="p-3">Option B: Proposed Dual Role + Assistant Developer</td>
-                  <td class="p-3 text-emerald-400">₱105,000 – ₱110,000 / mo</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="lg:col-span-4 bg-gradient-to-b from-slate-900 to-emerald-950/40 p-6 rounded-2xl border border-emerald-500/40 text-center shadow-lg space-y-3">
-            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider block">Net Monthly Savings</span>
-            <div class="text-3xl font-black text-white">₱55,000 – ₱105,000</div>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Saved every month compared to hiring two separate external roles and paying recurring SaaS software seat fees.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- SLIDE 6: ROLE CLARITY -->
-      <section id="slide-6" class="slide-card hidden w-full glass-card rounded-2xl p-6 sm:p-10 border border-slate-700/60 shadow-2xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-700/60 pb-4">
-          <div>
-            <span class="text-xs font-semibold text-sky-400 tracking-widest uppercase">Role Alignment • Slide 6 of 8</span>
-            <h2 class="text-2xl sm:text-4xl font-serif font-bold text-white mt-1">Operations Manager vs. Resident Manager</h2>
-          </div>
-          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs">Organizational Clarity</span>
-        </div>
-
-        <div class="overflow-x-auto mb-4">
-          <table class="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-900 text-sky-400 border-b border-slate-700">
-                <th class="p-3 font-bold w-1/4">Functional Area</th>
-                <th class="p-3 font-bold w-3/8">Proposed Operations Manager</th>
-                <th class="p-3 font-bold w-3/8 text-slate-400">Resident Manager</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-800 text-slate-300">
-              <tr>
-                <td class="p-3 font-bold text-white">Focus</td>
-                <td class="p-3 text-sky-300 font-medium">Operational discipline, ERP tools & cost controls</td>
-                <td class="p-3 text-slate-400">Day-to-day overall property leadership</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-bold text-white">ERP System</td>
-                <td class="p-3 text-sky-300 font-medium">Architects, codes, and drives staff adoption</td>
-                <td class="p-3 text-slate-400">Executive sponsor & high-level reviewer</td>
-              </tr>
-              <tr>
-                <td class="p-3 font-bold text-white">Primary KPIs</td>
-                <td class="p-3 text-sky-300 font-medium">Process compliance, system delivery, task speed</td>
-                <td class="p-3 text-slate-400">Guest satisfaction, resort revenue, room ADR</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 text-xs text-slate-300">
-          <strong class="text-sky-400">Complementary Leadership:</strong> The Operations Manager enforces operational systems, freeing the Resident Manager to focus on overall hospitality and revenue strategy.
-        </div>
-      </section>
-
-      <!-- SLIDE 7: DIGITAL ASSETS & HOSTING -->
-      <section id="slide-7" class="slide-card hidden w-full glass-card rounded-2xl p-6 sm:p-10 border border-slate-700/60 shadow-2xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-700/60 pb-4">
-          <div>
-            <span class="text-xs font-semibold text-sky-400 tracking-widest uppercase">Digital Governance • Slide 7 of 8</span>
-            <h2 class="text-2xl sm:text-4xl font-serif font-bold text-white mt-1">Website Hosting & Infrastructure Oversight</h2>
-          </div>
-          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs">In-House Control</span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
-            <i class="fa-solid fa-server text-sky-400 text-2xl mb-3"></i>
-            <h3 class="text-sm font-bold text-white mb-2">Domain & Hosting</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">Direct internal oversight of DNS records, SSL certificates, and server settings.</p>
-          </div>
-
-          <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
-            <i class="fa-solid fa-shield-halved text-emerald-400 text-2xl mb-3"></i>
-            <h3 class="text-sm font-bold text-white mb-2">Security & Backups</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">Automated database snapshots, access permissions, and malware security checks.</p>
-          </div>
-
-          <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
-            <i class="fa-solid fa-file-contract text-amber-400 text-2xl mb-3"></i>
-            <h3 class="text-sm font-bold text-white mb-2">Vendor Audit</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">Audit existing agency recurring charges to eliminate unnecessary middleman fees.</p>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 text-xs text-slate-300">
-          <i class="fa-solid fa-circle-info text-sky-400 mr-1.5"></i>
-          Internal administration eliminates third-party management agency markup, while maintaining essential low-cost cloud server hosting directly under resort ownership.
-        </div>
-      </section>
-
-      <!-- SLIDE 8: DECISION REQUESTED & APPROVAL -->
-      <section id="slide-8" class="slide-card hidden w-full glass-card rounded-2xl p-6 sm:p-10 border border-slate-700/60 shadow-2xl">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-700/60 pb-4">
-          <div>
-            <span class="text-xs font-semibold text-sky-400 tracking-widest uppercase">Executive Decision • Slide 8 of 8</span>
-            <h2 class="text-2xl sm:text-4xl font-serif font-bold text-white mt-1">The Decision Requested</h2>
-          </div>
-          <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold">
-            Action Plan
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div class="p-5 bg-slate-900/80 rounded-xl border border-slate-700">
-            <div class="text-sm font-bold text-amber-400 mb-1">1. Formal Appointment</div>
-            <p class="text-xs text-slate-300">
-              Approve position of <strong>Hotel Operations Manager & Systems Developer</strong> at <strong>₱80,000 monthly gross</strong>.
-            </p>
-          </div>
-
-          <div class="p-5 bg-slate-900/80 rounded-xl border border-slate-700">
-            <div class="text-sm font-bold text-amber-400 mb-1">2. Technical Support</div>
-            <p class="text-xs text-slate-300">
-              Authorize recruitment of <strong>1x Assistant Systems Developer</strong> at <strong>₱25,000–₱30,000 monthly gross</strong>.
-            </p>
-          </div>
-
-          <div class="p-5 bg-slate-900/80 rounded-xl border border-slate-700">
-            <div class="text-sm font-bold text-amber-400 mb-1">3. Project Mandate</div>
-            <p class="text-xs text-slate-300">
-              Grant authority to build prioritized ERP modules and assume web asset oversight.
-            </p>
-          </div>
-
-          <div class="p-5 bg-slate-900/80 rounded-xl border border-slate-700">
-            <div class="text-sm font-bold text-amber-400 mb-1">4. Governance</div>
-            <p class="text-xs text-slate-300">
-              Establish monthly reviews and 90-day pilot validation milestones.
-            </p>
-          </div>
-        </div>
-
-        <div class="p-5 bg-gradient-to-r from-slate-900 via-sky-950/40 to-slate-900 rounded-xl border border-sky-500/30 text-center">
-          <p class="text-sm italic text-slate-200">
-            "An investment in operational leadership and customized resort technology—built to optimize today and scale for tomorrow."
-          </p>
-        </div>
-      </section>
-
     </div>
 
-  </main>
-
-  <!-- BOTTOM SLIDE CONTROL FOOTER -->
-  <footer class="bg-brand-navy/95 border-t border-slate-800 py-3 px-4 sm:px-8 sticky bottom-0 z-40 shadow-xl">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      
-      <!-- Slide Counter -->
-      <div class="text-xs text-slate-400 font-medium flex items-center gap-2">
-        <span>Slide</span>
-        <span id="currentSlideNum" class="font-bold text-sky-400 text-sm">1</span>
-        <span>of</span>
-        <span class="font-bold text-slate-200">8</span>
-      </div>
-
-      <!-- Slide Indicator Dots -->
-      <div class="hidden sm:flex items-center space-x-2" id="dotsContainer"></div>
-
-      <!-- Navigation Buttons -->
-      <div class="flex items-center space-x-2">
-        <button id="prevBtn" onclick="prevSlide()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 disabled:opacity-40 transition flex items-center gap-2">
-          <i class="fa-solid fa-chevron-left"></i> Previous
-        </button>
-
-        <button id="nextBtn" onclick="nextSlide()" class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md transition flex items-center gap-2">
-          Next <i class="fa-solid fa-chevron-right"></i>
-        </button>
-      </div>
-    </div>
-  </footer>
-
-  <!-- SLIDE OVERVIEW GRID MODAL -->
-  <div id="slideOverviewModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-brand-navy border border-slate-700 rounded-2xl max-w-4xl w-full p-6 max-h-[85vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-        <h3 class="text-lg font-serif font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-table-cells text-sky-400"></i> Presentation Overview
-        </h3>
-        <button onclick="toggleSlideOverview()" class="text-slate-400 hover:text-white p-2">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="gridThumbnailsContainer"></div>
-    </div>
-  </div>
-
-  <!-- INTERACTIVE ROI CALCULATOR MODAL -->
-  <div id="roiCalculatorModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-brand-navy border border-emerald-500/30 rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative">
-      <button onclick="toggleRoiCalculatorModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
-
-      <div class="border-b border-slate-800 pb-4 mb-6">
-        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Financial Simulation</span>
-        <h3 class="text-xl font-serif font-bold text-white mt-1">Kamana Operational ROI Calculator</h3>
-      </div>
-
-      <div class="space-y-6 mb-6">
+    <!-- Success Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3">
+        <div class="bg-emerald-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-check"></i>
+        </div>
         <div>
-          <div class="flex justify-between text-xs font-bold mb-2">
-            <span class="text-slate-300">Resort Occupancy Rate</span>
-            <span id="occupancyVal" class="text-sky-400 font-extrabold text-sm">70%</span>
-          </div>
-          <input type="range" id="occupancySlider" min="30" max="100" value="70" oninput="updateRoiCalc()" class="w-full accent-sky-500 bg-slate-800 h-2 rounded-lg cursor-pointer">
+            <h4 class="text-sm font-bold" id="toastTitle">Success!</h4>
+            <p class="text-xs text-slate-300" id="toastMsg">Registration saved successfully.</p>
         </div>
-
-        <div>
-          <div class="flex justify-between text-xs font-bold mb-2">
-            <span class="text-slate-300">Monthly F&B Purchasing Budget</span>
-            <span id="fnbVal" class="text-sky-400 font-extrabold text-sm">₱1,200,000</span>
-          </div>
-          <input type="range" id="fnbSlider" min="500000" max="3000000" step="50000" value="1200000" oninput="updateRoiCalc()" class="w-full accent-sky-500 bg-slate-800 h-2 rounded-lg cursor-pointer">
-        </div>
-
-        <div class="bg-gradient-to-r from-emerald-950/60 to-slate-900 p-5 rounded-xl border border-emerald-500/40 text-center">
-          <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider block mb-1">Projected Combined Monthly Benefit</span>
-          <span id="calcTotalSavings" class="text-3xl font-black text-emerald-300">₱115,000</span>
-          <span class="text-xs text-slate-300 block mt-2">Payback Period: <strong id="calcPaybackMonths" class="text-amber-300">3.8 Months</strong></span>
-        </div>
-      </div>
-
-      <button onclick="toggleRoiCalculatorModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700">
-        Close Widget
-      </button>
     </div>
-  </div>
 
-  <!-- PRESENTATION LOGIC & PPTX EXPORTER -->
-  <script>
-    let currentSlide = 1;
-    const totalSlides = 8;
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 mt-12 text-center text-xs space-y-2">
+        <p class="font-semibold text-slate-300">Batang Pinoy Taekwondo Team Gear Initiative</p>
+        <p>Supplier: KALOSph Las Piñas (#17 Las Piñas Commercial Complex, Talon Uno Las Piñas City | Tel: 09620485439)</p>
+        <p class="text-slate-500 pt-2">&copy; 2026 Batang Pinoy Taekwondo. All rights reserved.</p>
+    </footer>
 
-    const slideTitles = [
-      "Executive Proposal",
-      "ERP Architecture Diagram",
-      "Candidate Qualifications",
-      "Proposed ERP Scope",
-      "Salary & Cost Comparison",
-      "Role Clarity",
-      "Digital Governance",
-      "Decision Requested"
-    ];
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Prices
+        const PRICE_JACKET = 1100;
+        const PRICE_TSHIRT = 500;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      renderDots();
-      renderThumbnails();
-      goToSlide(1);
+        // Local Storage Key
+        const STORAGE_KEY = 'batang_pinoy_taekwondo_registrations_2026';
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowRight") nextSlide();
-        if (e.key === "ArrowLeft") prevSlide();
-      });
-    });
-
-    function goToSlide(index) {
-      if (index < 1) index = 1;
-      if (index > totalSlides) index = totalSlides;
-
-      currentSlide = index;
-
-      for (let i = 1; i <= totalSlides; i++) {
-        const el = document.getElementById(`slide-${i}`);
-        if (el) el.classList.add("hidden");
-      }
-
-      const activeEl = document.getElementById(`slide-${currentSlide}`);
-      if (activeEl) activeEl.classList.remove("hidden");
-
-      document.getElementById("currentSlideNum").innerText = currentSlide;
-      document.getElementById("progressBar").style.width = `${(currentSlide / totalSlides) * 100}%`;
-
-      document.getElementById("prevBtn").disabled = (currentSlide === 1);
-      document.getElementById("nextBtn").disabled = (currentSlide === totalSlides);
-
-      for (let i = 1; i <= totalSlides; i++) {
-        const dot = document.getElementById(`dot-${i}`);
-        if (dot) {
-          dot.className = i === currentSlide 
-            ? "w-6 h-2 rounded-full bg-sky-400 transition-all" 
-            : "w-2 h-2 rounded-full bg-slate-700 hover:bg-slate-500 cursor-pointer transition-all";
-        }
-      }
-    }
-
-    function nextSlide() { goToSlide(currentSlide + 1); }
-    function prevSlide() { goToSlide(currentSlide - 1); }
-
-    function renderDots() {
-      const container = document.getElementById("dotsContainer");
-      container.innerHTML = "";
-      for (let i = 1; i <= totalSlides; i++) {
-        const dot = document.createElement("button");
-        dot.id = `dot-${i}`;
-        dot.onclick = () => goToSlide(i);
-        container.appendChild(dot);
-      }
-    }
-
-    function renderThumbnails() {
-      const container = document.getElementById("gridThumbnailsContainer");
-      container.innerHTML = "";
-      for (let i = 1; i <= totalSlides; i++) {
-        const thumb = document.createElement("div");
-        thumb.className = "bg-slate-900 border border-slate-800 hover:border-sky-500 p-4 rounded-xl cursor-pointer transition flex flex-col justify-between h-28";
-        thumb.onclick = () => {
-          goToSlide(i);
-          toggleSlideOverview();
+        // Initialize on load
+        window.onload = function() {
+            updateCalculation();
+            updateSubmissionCount();
         };
-        thumb.innerHTML = `
-          <div>
-            <span class="text-[10px] font-bold text-sky-400 uppercase">Slide ${i}</span>
-            <h4 class="text-xs font-bold text-white mt-1">${slideTitles[i - 1]}</h4>
-          </div>
-          <div class="text-[10px] text-slate-500 flex justify-between items-center">
-            <span>Jump to slide</span>
-            <i class="fa-solid fa-arrow-right text-sky-400"></i>
-          </div>
-        `;
-        container.appendChild(thumb);
-      }
-    }
 
-    function toggleSlideOverview() {
-      document.getElementById("slideOverviewModal").classList.toggle("hidden");
-    }
+        // Scroll to form helper
+        function scrollToForm() {
+            document.getElementById('registrationFormSection').scrollIntoView({ behavior: 'smooth' });
+        }
 
-    function toggleRoiCalculatorModal() {
-      document.getElementById("roiCalculatorModal").classList.toggle("hidden");
-    }
+        // Toggle Jacket options and validation
+        function toggleJacketOptions() {
+            const checkbox = document.getElementById('buyJacket');
+            const container = document.getElementById('jacketSizeContainer');
+            const select = document.getElementById('jacketSize');
+            const card = document.getElementById('jacketCard');
 
-    function updateRoiCalc() {
-      const occ = parseInt(document.getElementById("occupancySlider").value);
-      const fnb = parseInt(document.getElementById("fnbSlider").value);
+            if (checkbox.checked) {
+                container.classList.remove('opacity-40', 'pointer-events-none');
+                select.setAttribute('required', 'true');
+                card.classList.add('border-taekwondo-blue', 'bg-white', 'shadow-sm');
+            } else {
+                container.classList.add('opacity-40', 'pointer-events-none');
+                select.removeAttribute('required');
+                select.value = '';
+                card.classList.remove('border-taekwondo-blue', 'bg-white', 'shadow-sm');
+            }
+            updateCalculation();
+        }
 
-      document.getElementById("occupancyVal").innerText = `${occ}%`;
-      document.getElementById("fnbVal").innerText = `₱${fnb.toLocaleString()}`;
+        // Toggle T-Shirt options and validation
+        function toggleTshirtOptions() {
+            const checkbox = document.getElementById('buyTshirt');
+            const container = document.getElementById('tshirtSizeContainer');
+            const select = document.getElementById('tshirtSize');
+            const card = document.getElementById('tshirtCard');
 
-      const fnbSavings = Math.round((fnb * 0.05) * (occ / 100));
-      const adminSavings = Math.round(35000 + (occ * 350));
-      const totalSavings = fnbSavings + adminSavings;
-      const paybackMonths = (110000 / totalSavings * 3.5).toFixed(1);
+            if (checkbox.checked) {
+                container.classList.remove('opacity-40', 'pointer-events-none');
+                select.setAttribute('required', 'true');
+                card.classList.add('border-taekwondo-blue', 'bg-white', 'shadow-sm');
+            } else {
+                container.classList.add('opacity-40', 'pointer-events-none');
+                select.removeAttribute('required');
+                select.value = '';
+                card.classList.remove('border-taekwondo-blue', 'bg-white', 'shadow-sm');
+            }
+            updateCalculation();
+        }
 
-      document.getElementById("calcTotalSavings").innerText = `₱${totalSavings.toLocaleString()}`;
-      document.getElementById("calcPaybackMonths").innerText = `${paybackMonths} Months`;
-    }
+        // Toggle Fulfillment Method
+        function toggleFulfillment() {
+            const deliveryRadio = document.querySelector('input[name="fulfillment"][value="Delivery"]');
+            const addressContainer = document.getElementById('addressContainer');
 
-    function downloadPowerPoint() {
-      let pptx = new PptxGenJS();
-      pptx.layout = 'LAYOUT_16x9';
+            if (deliveryRadio.checked) {
+                addressContainer.classList.remove('hidden');
+            } else {
+                addressContainer.classList.add('hidden');
+            }
+        }
 
-      const NAVY = "0F172A";
-      const BLUE = "0284C7";
-      const DARK = "1E293B";
-      const MUTED = "64748B";
+        // Dynamic price calculation
+        function updateCalculation() {
+            let total = 0;
+            const buyJacket = document.getElementById('buyJacket').checked;
+            const buyTshirt = document.getElementById('buyTshirt').checked;
 
-      // Slide 1: Cover
-      let s1 = pptx.addSlide();
-      s1.background = { color: NAVY };
-      s1.addText("KAMANA SANCTUARY RESORT & SPA", { x: 0.8, y: 1.2, w: 8.0, h: 0.4, fontSize: 12, color: "38BDF8", bold: true });
-      s1.addText("Resort Operations & ERP Transformation", { x: 0.8, y: 1.8, w: 10.0, h: 1.5, fontSize: 36, color: "FFFFFF", bold: true, fontFace: "Georgia" });
-      s1.addText("A unified strategic roadmap combining operational leadership and custom systems development.", { x: 0.8, y: 3.5, w: 9.0, h: 1.0, fontSize: 16, color: "CBD5E1" });
+            if (buyJacket) total += PRICE_JACKET;
+            if (buyTshirt) total += PRICE_TSHIRT;
 
-      // Slide 2: Diagram
-      let s2 = pptx.addSlide();
-      s2.addText("INTEGRATED ERP ARCHITECTURE", { x: 0.8, y: 0.5, w: 8.0, h: 0.4, fontSize: 20, color: NAVY, bold: true });
-      s2.addImage({
-        path: "https://lh3.googleusercontent.com/gg/AJWXcNc60uHXTOBlX7D5-xXMZZq24xV5UcbmqWX9jPjMNzpg56_TOskvu1nEto1o84o1f_uAvqGbwgXw5vn3bYRAq9oWxa9hnXus9_IAQ3d2mhpNR0bOpLu4M4cjmpG8lK3q4Zv6zEDDFDTwbzq5viithlyUjmXunrJovIHr9bcZJj7NuvvM6Gg8kpsmU8aj86clZenUKBeCOkU05_MAcoQIRqzJEZQ_99GIi-3Ng8cEReSqYIEwFMsZPhhUxtYZ2l9trlI36eDVLSVnE5glKm5HL1Jf5G7Zx5jpyw",
-        x: 0.8, y: 1.2, w: 11.6, h: 5.5
-      });
+            const formatted = '₱' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const calcTotalEl = document.getElementById('calculatedTotal');
+            const headerTotalEl = document.getElementById('headerTotal');
+            
+            if (calcTotalEl) calcTotalEl.innerText = formatted;
+            if (headerTotalEl) headerTotalEl.innerText = formatted;
+        }
 
-      // Additional Slides...
-      let s3 = pptx.addSlide();
-      s3.addText("CANDIDATE BACKGROUND & FIT", { x: 0.8, y: 0.5, w: 8.0, h: 0.4, fontSize: 20, color: NAVY, bold: true });
+        // Handle Form Submission
+        function handleFormSubmit(e) {
+            e.preventDefault();
 
-      pptx.writeFile({ fileName: "Kamana_Sanctuary_ERP_Proposal.pptx" });
-    }
-  </script>
+            const buyJacket = document.getElementById('buyJacket').checked;
+            const buyTshirt = document.getElementById('buyTshirt').checked;
+
+            if (!buyJacket && !buyTshirt) {
+                showToast('Validation Error', 'Please select at least a Jacket or a T-Shirt to purchase.', 'error');
+                return;
+            }
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const jacketSize = buyJacket ? document.getElementById('jacketSize').value : 'N/A';
+            const tshirtSize = buyTshirt ? document.getElementById('tshirtSize').value : 'N/A';
+            const fulfillment = document.querySelector('input[name="fulfillment"]:checked').value;
+            const deliveryNote = fulfillment === 'Delivery' ? 'Delivery (Contact 09620485439)' : 'Store Pickup (KALOSph)';
+            const paymentStatus = document.getElementById('paymentStatus').value;
+
+            let total = 0;
+            if (buyJacket) total += PRICE_JACKET;
+            if (buyTshirt) total += PRICE_TSHIRT;
+
+            const record = {
+                id: 'BP-' + Date.now().toString().slice(-6),
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                fullName,
+                jacket: buyJacket ? `Yes (${jacketSize})` : 'No',
+                tshirt: buyTshirt ? `Yes (${tshirtSize})` : 'No',
+                fulfillment,
+                deliveryNote,
+                paymentStatus,
+                total
+            };
+
+            // Save to LocalStorage
+            let submissions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            submissions.push(record);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(submissions));
+
+            // Reset Form
+            document.getElementById('gearForm').reset();
+            toggleJacketOptions();
+            toggleTshirtOptions();
+            toggleFulfillment();
+            updateCalculation();
+            updateSubmissionCount();
+
+            showToast('Registration Successful!', `${fullName}, your gear order has been recorded.`);
+        }
+
+        // Toast Notification Helper
+        function showToast(title, msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMsg').innerText = msg;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 4000);
+        }
+
+        // Submission Count Badge
+        function updateSubmissionCount() {
+            let submissions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            document.getElementById('submissionCount').innerText = submissions.length;
+        }
+
+        // Open Admin Submissions Modal
+        function openAdminModal() {
+            renderSubmissionsTable();
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        // Close Admin Submissions Modal
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        // Render Table Data
+        function renderSubmissionsTable() {
+            let submissions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            const tbody = document.getElementById('submissionsTableBody');
+            const noSub = document.getElementById('noSubmissions');
+            const tableContainer = document.getElementById('tableContainer');
+            const summaryText = document.getElementById('modalSummaryText');
+
+            tbody.innerHTML = '';
+            summaryText.innerText = `Total Entries: ${submissions.length}`;
+
+            if (submissions.length === 0) {
+                noSub.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                return;
+            }
+
+            noSub.classList.add('hidden');
+            tableContainer.classList.remove('hidden');
+
+            submissions.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition text-xs";
+
+                const paymentBadge = item.paymentStatus === 'Paid' 
+                    ? '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Paid</span>'
+                    : '<span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">Pending</span>';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-800">
+                        ${item.fullName}
+                        <span class="block text-[10px] text-slate-400 font-normal">${item.date}</span>
+                    </td>
+                    <td class="p-3">${item.jacket}</td>
+                    <td class="p-3">${item.tshirt}</td>
+                    <td class="p-3">
+                        <span class="font-medium">${item.fulfillment}</span>
+                        <span class="block text-[10px] text-slate-400">${item.deliveryNote}</span>
+                    </td>
+                    <td class="p-3 font-bold text-slate-900">₱${item.total.toLocaleString()}</td>
+                    <td class="p-3">${paymentBadge}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteSubmission(${index})" class="text-slate-400 hover:text-red-600 p-1 transition" title="Delete Entry">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Delete single submission
+        function deleteSubmission(index) {
+            if (confirm('Are you sure you want to delete this registration entry?')) {
+                let submissions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                submissions.splice(index, 1);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(submissions));
+                renderSubmissionsTable();
+                updateSubmissionCount();
+            }
+        }
+
+        // Reset all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all registrations? This cannot be undone.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                renderSubmissionsTable();
+                updateSubmissionCount();
+            }
+        }
+
+        // Export Submissions to CSV
+        function exportToCSV() {
+            let submissions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            if (submissions.length === 0) {
+                alert('No data available to export.');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "ID,Date,Full Name,Jacket,T-Shirt,Fulfillment Method,Details,Payment Status,Total Amount (PHP)\r\n";
+
+            submissions.forEach(item => {
+                let row = [
+                    item.id,
+                    item.date,
+                    `"${item.fullName}"`,
+                    `"${item.jacket}"`,
+                    `"${item.tshirt}"`,
+                    `"${item.fulfillment}"`,
+                    `"${item.deliveryNote}"`,
+                    item.paymentStatus,
+                    item.total
+                ];
+                csvContent += row.join(",") + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Batang_Pinoy_Taekwondo_Registrations.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 </html>
