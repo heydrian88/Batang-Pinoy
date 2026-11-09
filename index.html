@@ -301,57 +301,13 @@
         <img id="lightboxImg" src="" alt="" class="max-h-[90vh] max-w-full rounded-xl shadow-2xl">
     </div>
 
-    <!-- Admin: Edit Submission Modal -->
-    <div id="editOrderModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden items-center justify-center p-4">
-        <form id="editOrderForm" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto">
-            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-pen text-taekwondo-accent"></i> Edit Submission</h3>
-                <button type="button" onclick="closeEditOrder()" class="text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="p-6 space-y-4 text-sm">
-                <div>
-                    <label class="text-xs font-bold text-slate-600">Full Name *</label>
-                    <input id="eName" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2">
-                </div>
-                <div class="border border-slate-200 rounded-xl p-3 space-y-2">
-                    <label class="flex items-center gap-2 font-bold"><input type="checkbox" id="eJacket" class="w-4 h-4"> Team Jacket (₱1,100)</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <select id="eJacketSize" class="border border-slate-300 rounded-lg px-3 py-2 bg-white"></select>
-                        <input id="eJacketBack" maxlength="20" placeholder="Back print name" class="border border-slate-300 rounded-lg px-3 py-2 uppercase">
-                    </div>
-                </div>
-                <div class="border border-slate-200 rounded-xl p-3 space-y-2">
-                    <label class="flex items-center gap-2 font-bold"><input type="checkbox" id="eTshirt" class="w-4 h-4"> T-Shirt (₱500)</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <select id="eTshirtSize" class="border border-slate-300 rounded-lg px-3 py-2 bg-white"></select>
-                        <input id="eTshirtBack" maxlength="20" placeholder="Back print name" class="border border-slate-300 rounded-lg px-3 py-2 uppercase">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-xs font-bold text-slate-600">Fulfillment</label>
-                        <select id="eFulfillment" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"><option>Delivery</option><option>Store Pickup</option></select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-600">Payment Status</label>
-                        <select id="ePayment" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"><option>Pending</option><option>Paid</option></select>
-                    </div>
-                </div>
-                <div class="flex gap-2 pt-1">
-                    <button type="button" onclick="closeEditOrder()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-lg">Cancel</button>
-                    <button id="eSaveBtn" type="submit" class="flex-1 bg-taekwondo-blue hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg">Save Changes</button>
-                </div>
-            </div>
-        </form>
-    </div>
-
     <!-- My Submissions Modal (this device only) -->
     <div id="mySubModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[65] hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
                 <div>
-                    <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-list-check text-taekwondo-accent"></i> <span id="mySubTitle">My Submissions</span></h3>
-                    <p id="mySubSub" class="text-xs text-slate-400">Your registrations submitted from this device.</p>
+                    <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-list-check text-taekwondo-accent"></i> My Submissions</h3>
+                    <p class="text-xs text-slate-400">Your registrations submitted from this device.</p>
                 </div>
                 <button onclick="closeMySubmissions()" class="text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -430,8 +386,7 @@
     <!-- JavaScript Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp }
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp }
             from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -444,12 +399,10 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
         const registrationsRef = collection(db, 'registrations');
 
         // Prices
         const MY_KEY = 'batang_pinoy_my_submissions_2026';
-        let isAdmin = false, adminOrders = [], unsubOrders = null;
         const PRICE_JACKET = 1100;
         const PRICE_TSHIRT = 500;
 
@@ -710,23 +663,7 @@
             lb.classList.add('hidden'); lb.classList.remove('flex');
         }
 
-        // ---------- Submissions: customers see their own; a logged-in admin sees all and can edit/delete ----------
-
-        onAuthStateChanged(auth, (user) => {
-            isAdmin = !!user;
-            if (unsubOrders) { unsubOrders(); unsubOrders = null; }
-            adminOrders = [];
-            if (user) {
-                unsubOrders = onSnapshot(query(registrationsRef, orderBy('createdAt', 'asc')), (snap) => {
-                    adminOrders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-                    updateMyCount();
-                    if (!document.getElementById('mySubModal').classList.contains('hidden')) renderSubmissions();
-                }, (err) => console.error('Orders error:', err));
-            }
-            updateMyCount();
-            if (!document.getElementById('mySubModal').classList.contains('hidden')) renderSubmissions();
-        });
-
+        // ---------- My Submissions (read-only, stored on this device only) ----------
         function loadMine() {
             try { return JSON.parse(localStorage.getItem(MY_KEY)) || []; } catch (e) { return []; }
         }
@@ -736,16 +673,11 @@
             updateMyCount();
         }
         function updateMyCount() {
-            document.getElementById('mySubCount').innerText = isAdmin ? adminOrders.length : loadMine().length;
+            document.getElementById('mySubCount').innerText = loadMine().length;
         }
-
-        function renderSubmissions() {
-            const list = (isAdmin ? adminOrders : loadMine()).slice().reverse();
+        function openMySubmissions() {
+            const list = loadMine().slice().reverse();
             const e = (t) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            document.getElementById('mySubTitle').innerText = isAdmin ? 'All Submissions (Admin)' : 'My Submissions';
-            document.getElementById('mySubSub').innerText = isAdmin
-                ? 'You are logged in as admin. You can edit or delete any submission.'
-                : 'Your registrations submitted from this device.';
             document.getElementById('mySubBody').innerHTML = list.length ? list.map(r => `
                 <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2 text-sm">
                     <div class="flex justify-between items-start gap-2">
@@ -765,92 +697,16 @@
                         <span>${e(r.deliveryNote)}</span>
                         <span class="font-black text-taekwondo-blue text-sm">₱${Number(r.total || 0).toLocaleString()}</span>
                     </div>
-                    ${isAdmin ? `
-                    <div class="flex gap-4 pt-2 border-t border-slate-100 text-xs font-bold">
-                        <button onclick="openEditOrder('${r.docId}')" class="text-taekwondo-blue hover:underline"><i class="fa-solid fa-pen"></i> Edit</button>
-                        <button onclick="deleteOrder('${r.docId}')" class="text-red-600 hover:underline"><i class="fa-solid fa-trash-can"></i> Delete</button>
-                    </div>` : ''}
-                </div>`).join('') : '<div class="text-center py-12 text-sm text-slate-500">No submissions yet.</div>';
-        }
-        function openMySubmissions() {
-            renderSubmissions();
+                </div>`).join('') : '<div class="text-center py-12 text-sm text-slate-500">No submissions yet from this device.</div>';
             const m = document.getElementById('mySubModal'); m.classList.remove('hidden'); m.classList.add('flex');
         }
         function closeMySubmissions() {
             const m = document.getElementById('mySubModal'); m.classList.add('hidden'); m.classList.remove('flex');
         }
 
-        // ----- Admin: edit / delete a submission -----
-        const SIZE_OPTIONS = ['S', 'M', 'L', 'XL', '2XL', '3XL'];
-        function fillSizeSelect(id, current) {
-            const sel = document.getElementById(id);
-            const opts = SIZE_OPTIONS.includes(current) || !current || current === 'N/A' ? SIZE_OPTIONS : [...SIZE_OPTIONS, current];
-            sel.innerHTML = '<option value="">-- Size --</option>' + opts.map(o => `<option ${o === current ? 'selected' : ''}>${o}</option>`).join('');
-        }
-        const sizeOf = (str) => { const m = /\((.+)\)/.exec(str || ''); return m ? m[1] : ''; };
-        let editingOrderId = null;
-
-        function openEditOrder(docId) {
-            const r = adminOrders.find(x => x.docId === docId); if (!r) return;
-            editingOrderId = docId;
-            document.getElementById('eName').value = r.fullName || '';
-            const hasJ = r.jacket && r.jacket !== 'No', hasT = r.tshirt && r.tshirt !== 'No';
-            document.getElementById('eJacket').checked = !!hasJ;
-            document.getElementById('eTshirt').checked = !!hasT;
-            fillSizeSelect('eJacketSize', sizeOf(r.jacket));
-            fillSizeSelect('eTshirtSize', sizeOf(r.tshirt));
-            document.getElementById('eJacketBack').value = r.jacketBackPrint || '';
-            document.getElementById('eTshirtBack').value = r.backPrint || '';
-            document.getElementById('eFulfillment').value = r.fulfillment === 'Store Pickup' ? 'Store Pickup' : 'Delivery';
-            document.getElementById('ePayment').value = r.paymentStatus === 'Paid' ? 'Paid' : 'Pending';
-            const m = document.getElementById('editOrderModal'); m.classList.remove('hidden'); m.classList.add('flex');
-        }
-        function closeEditOrder() {
-            const m = document.getElementById('editOrderModal'); m.classList.add('hidden'); m.classList.remove('flex');
-            editingOrderId = null;
-        }
-
-        document.getElementById('editOrderForm').addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            if (!isAdmin || !editingOrderId) return;
-            const g = (id) => document.getElementById(id);
-            const buyJ = g('eJacket').checked, buyT = g('eTshirt').checked;
-            if (!buyJ && !buyT) { alert('Select at least a Jacket or a T-Shirt.'); return; }
-            if (buyJ && (!g('eJacketSize').value || !g('eJacketBack').value.trim())) { alert('Jacket needs a size and back print name.'); return; }
-            if (buyT && (!g('eTshirtSize').value || !g('eTshirtBack').value.trim())) { alert('T-Shirt needs a size and back print name.'); return; }
-            const fulfillment = g('eFulfillment').value;
-            const data = {
-                fullName: g('eName').value.trim(),
-                jacket: buyJ ? `Yes (${g('eJacketSize').value})` : 'No',
-                jacketBackPrint: buyJ ? g('eJacketBack').value.trim().toUpperCase() : '',
-                tshirt: buyT ? `Yes (${g('eTshirtSize').value})` : 'No',
-                backPrint: buyT ? g('eTshirtBack').value.trim().toUpperCase() : '',
-                fulfillment,
-                deliveryNote: fulfillment === 'Delivery' ? 'Delivery (Contact 09620485439)' : 'Store Pickup (KALOSph)',
-                paymentStatus: g('ePayment').value,
-                total: (buyJ ? PRICE_JACKET : 0) + (buyT ? PRICE_TSHIRT : 0)
-            };
-            const btn = g('eSaveBtn'); btn.disabled = true; btn.innerText = 'Saving...';
-            try {
-                await updateDoc(doc(db, 'registrations', editingOrderId), data);
-                closeEditOrder();
-                showToast('Updated', 'Submission has been updated.');
-            } catch (err) {
-                console.error(err);
-                showToast('Update failed', 'Please make sure you are logged in as admin.', 'error');
-            } finally { btn.disabled = false; btn.innerText = 'Save Changes'; }
-        });
-
-        async function deleteOrder(docId) {
-            if (!isAdmin) return;
-            if (!confirm('Delete this submission? This cannot be undone.')) return;
-            try { await deleteDoc(doc(db, 'registrations', docId)); showToast('Deleted', 'Submission removed.'); }
-            catch (err) { console.error(err); showToast('Delete failed', 'Please make sure you are logged in as admin.', 'error'); }
-        }
-
         Object.assign(window, {
             scrollToForm, toggleJacketOptions, toggleTshirtOptions, toggleFulfillment,
-            handleFormSubmit, closeReceipt, openMySubmissions, closeMySubmissions, openEditOrder, closeEditOrder, deleteOrder, swapImage, openLightbox, closeLightbox
+            handleFormSubmit, closeReceipt, openMySubmissions, closeMySubmissions, swapImage, openLightbox, closeLightbox
         });
     </script>
 </body>
