@@ -676,7 +676,7 @@
                             <p class="font-extrabold text-slate-900">${e(r.fullName)}</p>
                             <p class="text-[11px] text-slate-400">${e(r.id)} · ${e(r.date)}</p>
                         </div>
-                        <span class="text-xs font-bold px-2 py-0.5 rounded ${r.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${e(r.paymentStatus)}</span>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded whitespace-nowrap ${r.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">Payment Status: ${e(r.paymentStatus)}</span>
                     </div>
                     <div class="grid grid-cols-2 gap-3 text-xs">
                         <div class="bg-slate-50 rounded-lg p-2.5"><span class="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">Jacket</span>
