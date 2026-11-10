@@ -257,6 +257,21 @@
             setTimeout(() => $('toast').classList.add('translate-y-20', 'opacity-0'), 3500);
         }
 
+        // Turn a Firebase error into a readable message that includes the real error code
+        function errMsg(err, fallback) {
+            const code = (err && err.code) ? String(err.code).replace('firestore/', '') : '';
+            const hints = {
+                'permission-denied': 'Permission denied: publish the Firestore rules and make sure you are logged in.',
+                'unauthenticated': 'You are logged out. Please log in again.',
+                'invalid-argument': 'The data is invalid or too large (limit ~1 MB per item).',
+                'resource-exhausted': 'Firestore quota exceeded or the item is too large.',
+                'unavailable': 'Cannot reach Firebase. Check your internet connection.',
+                'not-found': 'Document or database not found. Is Firestore enabled?',
+                'failed-precondition': 'Firestore is not set up correctly for this request.'
+            };
+            return (hints[code] || fallback) + (code ? ' [' + code + ']' : (err && err.message ? ' [' + err.message + ']' : ''));
+        }
+
         // ---------------- Auth ----------------
         $('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -386,7 +401,7 @@
                 resetForm();
             } catch (err) {
                 console.error(err);
-                toast('Save failed', 'Check your login and Firestore rules.');
+                toast('Save failed', errMsg(err, 'Check your login and Firestore rules.'));
             } finally {
                 btn.disabled = false; btn.innerText = editingId ? 'Save Changes' : 'Add Product';
             }
@@ -423,7 +438,7 @@
         async function deleteProduct(id) {
             if (!confirm('Delete this product from the main page?')) return;
             try { await deleteDoc(doc(db, 'products', id)); if (editingId === id) resetForm(); }
-            catch (err) { console.error(err); toast('Delete failed', 'Check your login and rules.'); }
+            catch (err) { console.error(err); toast('Delete failed', errMsg(err, 'Check your login and rules.')); }
         }
 
         function renderProducts() {
@@ -479,12 +494,12 @@
 
         async function setPayment(id, status) {
             try { await updateDoc(doc(db, 'registrations', id), { paymentStatus: status }); }
-            catch (err) { console.error(err); toast('Update failed', 'Check your login and rules.'); }
+            catch (err) { console.error(err); toast('Update failed', errMsg(err, 'Check your login and rules.')); }
         }
         async function deleteOrder(id) {
             if (!confirm('Delete this registration entry?')) return;
             try { await deleteDoc(doc(db, 'registrations', id)); }
-            catch (err) { console.error(err); toast('Delete failed', 'Check your login and rules.'); }
+            catch (err) { console.error(err); toast('Delete failed', errMsg(err, 'Check your login and rules.')); }
         }
         async function clearAllOrders() {
             if (!confirm('Clear ALL registrations? This cannot be undone.')) return;
@@ -493,7 +508,7 @@
                 const batch = writeBatch(db);
                 snap.forEach(d => batch.delete(d.ref));
                 await batch.commit();
-            } catch (err) { console.error(err); toast('Clear failed', 'Check your login and rules.'); }
+            } catch (err) { console.error(err); toast('Clear failed', errMsg(err, 'Check your login and rules.')); }
         }
 
         function exportToCSV() {
@@ -568,7 +583,7 @@
                 toast('Updated', 'Submission has been updated.');
             } catch (err) {
                 console.error(err);
-                toast('Update failed', 'Check your login and Firestore rules.');
+                toast('Update failed', errMsg(err, 'Check your login and Firestore rules.'));
             } finally { btn.disabled = false; btn.innerText = 'Save Changes'; }
         });
 
@@ -608,7 +623,7 @@
                 toast('Saved', 'GCash details are now on the main page.');
             } catch (err) {
                 console.error(err);
-                toast('Save failed', 'Check your login and Firestore rules.');
+                toast('Save failed', errMsg(err, 'Check your login and Firestore rules.'));
             } finally { btn.disabled = false; btn.innerText = 'Save Payment Details'; }
         });
 
