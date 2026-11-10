@@ -63,6 +63,7 @@
                 <button id="tabProducts" onclick="showTab('products')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-shirt"></i> Products</button>
                 <button id="tabOrders" onclick="showTab('orders')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-list-check"></i> Orders (<span id="orderCount">0</span>)</button>
                 <button id="tabPayment" onclick="showTab('payment')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-wallet"></i> GCash Payment</button>
+                <button id="tabCountdown" onclick="showTab('countdown')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-hourglass-half"></i> Countdown</button>
             </div>
 
             <!-- ===== Products tab ===== -->
@@ -158,6 +159,27 @@
                     <button id="gSaveBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm">Save Payment Details</button>
                 </form>
             </div>
+            <!-- ===== Countdown tab ===== -->
+            <div id="countdownTab" class="hidden max-w-xl bg-white rounded-2xl shadow p-6">
+                <h2 class="font-extrabold text-slate-900 mb-1">Registration Countdown</h2>
+                <p class="text-xs text-slate-500 mb-4">Shows in the middle of the main page header. When it reaches zero, the page shows "Registration Closed" and new orders are blocked. Admin login is not affected.</p>
+                <form id="countdownForm" class="space-y-4">
+                    <label class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                        <input type="checkbox" id="cdEnabled" class="w-4 h-4"> Show countdown on the main page
+                    </label>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Label above the timer</label>
+                        <input id="cdTitleInput" maxlength="40" placeholder="Registration closes in" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Deadline (date and time) *</label>
+                        <input id="cdDeadline" type="datetime-local" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                        <p class="text-[11px] text-slate-500 mt-1">Uses this device's local time (Philippine time if your device is set to it).</p>
+                    </div>
+                    <div id="cdStatus" class="text-xs font-semibold rounded-lg px-3 py-2 bg-slate-100 text-slate-600">No countdown set.</div>
+                    <button id="cdSaveBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm">Save Countdown</button>
+                </form>
+            </div>
         </main>
     </div>
 
@@ -225,7 +247,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
             from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, getDocs, writeBatch, setDoc, serverTimestamp }
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, getDocs, writeBatch, setDoc, serverTimestamp, Timestamp }
             from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -319,6 +341,10 @@
                 }
                 if (gcash.qr && !$('gQrFile').files.length) { $('gQrPreview').src = gcash.qr; $('gQrPreview').classList.remove('hidden'); }
             }));
+            unsubscribers.push(onSnapshot(doc(db, 'settings', 'countdown'), (snap) => {
+                countdownCfg = snap.exists() ? snap.data() : {};
+                fillCountdownForm();
+            }, (e) => console.error(e)));
             unsubscribers.push(onSnapshot(query(ordersRef, orderBy('createdAt', 'asc')), (snap) => {
                 orders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
                 renderOrders();
@@ -331,6 +357,8 @@
             $('productsTab').classList.toggle('hidden', name !== 'products');
             $('ordersTab').classList.toggle('hidden', name !== 'orders');
             $('paymentTab').classList.toggle('hidden', name !== 'payment');
+            $('countdownTab').classList.toggle('hidden', name !== 'countdown');
+            $('tabCountdown').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'countdown' ? on : off);
             $('tabPayment').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'payment' ? on : off);
             $('tabProducts').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'products' ? on : off);
             $('tabOrders').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'orders' ? on : off);
@@ -586,6 +614,48 @@
                 toast('Update failed', errMsg(err, 'Check your login and Firestore rules.'));
             } finally { btn.disabled = false; btn.innerText = 'Save Changes'; }
         });
+
+        // ---------------- Countdown ----------------
+        let countdownCfg = {};
+        const toLocalInput = (d) => {
+            const p = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+        };
+        const cfgDate = () => {
+            const raw = countdownCfg.deadline; if (!raw) return null;
+            const d = typeof raw.toDate === 'function' ? raw.toDate() : new Date(raw);
+            return isNaN(d.getTime()) ? null : d;
+        };
+        function fillCountdownForm() {
+            const busy = [$('cdTitleInput'), $('cdDeadline')].includes(document.activeElement);
+            if (!busy) {
+                $('cdEnabled').checked = !!countdownCfg.enabled;
+                $('cdTitleInput').value = countdownCfg.title || '';
+                const d = cfgDate(); $('cdDeadline').value = d ? toLocalInput(d) : '';
+            }
+            const d = cfgDate(), st = $('cdStatus');
+            if (!d) { st.innerText = 'No countdown set.'; st.className = 'text-xs font-semibold rounded-lg px-3 py-2 bg-slate-100 text-slate-600'; return; }
+            const expired = d.getTime() <= Date.now();
+            const when = d.toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' });
+            st.innerText = (expired ? 'Expired on ' : 'Closes on ') + when + (countdownCfg.enabled ? '' : ' (countdown hidden)');
+            st.className = 'text-xs font-semibold rounded-lg px-3 py-2 ' + (expired ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800');
+        }
+        $('countdownForm').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const enabled = $('cdEnabled').checked, val = $('cdDeadline').value;
+            if (enabled && !val) { alert('Please set a deadline date and time.'); return; }
+            const btn = $('cdSaveBtn'); btn.disabled = true; btn.innerText = 'Saving...';
+            try {
+                const data = { enabled, title: $('cdTitleInput').value.trim() };
+                if (val) data.deadline = Timestamp.fromDate(new Date(val));
+                await setDoc(doc(db, 'settings', 'countdown'), data, { merge: true });
+                toast('Saved', enabled ? 'Countdown is now showing on the main page.' : 'Countdown is hidden on the main page.');
+            } catch (err) {
+                console.error(err);
+                toast('Save failed', errMsg(err, 'Check your login and Firestore rules.'));
+            } finally { btn.disabled = false; btn.innerText = 'Save Countdown'; }
+        });
+        setInterval(() => { if (countdownCfg.deadline) fillCountdownForm(); }, 30000);
 
         // ---------------- GCash payment details ----------------
         $('gQrFile').addEventListener('change', () => {

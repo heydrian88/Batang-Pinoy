@@ -39,6 +39,7 @@
             background-size: 40px 40px;
             background-position: 0 0, 20px 20px;
         }
+        #registrationFormSection { scroll-margin-top: 9rem; }
         @media print {
             body > *:not(#receiptModal) { display: none !important; }
             #receiptModal { position: static !important; background: none !important; display: block !important; }
@@ -49,8 +50,8 @@
 <body class="bg-slate-50 text-slate-800 min-h-full flex flex-col justify-between">
 
     <!-- Header / Navbar -->
-    <header class="hero-pattern text-white shadow-lg border-b-4 border-taekwondo-red">
-        <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <header id="siteHeader" class="hero-pattern text-white shadow-lg border-b-4 border-taekwondo-red sticky top-0 z-40">
+        <div id="headerInner" class="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-4 transition-all duration-200">
             <div class="flex items-center space-x-3">
                 <div class="bg-taekwondo-red p-3 rounded-xl shadow-md text-white text-2xl font-black">
                     <i class="fa-solid fa-medal"></i>
@@ -60,11 +61,22 @@
                     <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Batang Pinoy Taekwondo</h1>
                 </div>
             </div>
+            <!-- Registration countdown (set from the admin page) -->
+            <div id="countdownBox" class="hidden flex-col items-center text-center">
+                <span id="cdTitle" class="text-[10px] uppercase tracking-widest text-taekwondo-accent font-bold mb-1.5">Registration closes in</span>
+                <div id="cdTimer" class="flex items-center gap-2">
+                    <div class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 min-w-[3.25rem]"><span id="cdD" class="block text-xl font-black leading-none">0</span><span class="text-[9px] uppercase tracking-wider text-slate-400">Days</span></div>
+                    <div class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 min-w-[3.25rem]"><span id="cdH" class="block text-xl font-black leading-none">00</span><span class="text-[9px] uppercase tracking-wider text-slate-400">Hrs</span></div>
+                    <div class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 min-w-[3.25rem]"><span id="cdM" class="block text-xl font-black leading-none">00</span><span class="text-[9px] uppercase tracking-wider text-slate-400">Min</span></div>
+                    <div class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 min-w-[3.25rem]"><span id="cdS" class="block text-xl font-black leading-none text-taekwondo-accent">00</span><span class="text-[9px] uppercase tracking-wider text-slate-400">Sec</span></div>
+                </div>
+                <div id="cdClosed" class="hidden bg-taekwondo-red text-white text-sm font-black uppercase tracking-widest px-5 py-2.5 rounded-lg shadow-lg"><i class="fa-solid fa-lock"></i> Registration Closed</div>
+            </div>
             <div class="flex items-center space-x-3">
                 <button onclick="openMySubmissions()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold px-4 py-2.5 rounded-lg transition flex items-center gap-2 shadow">
                     <i class="fa-solid fa-users-gear"></i> View Submissions (<span id="mySubCount">0</span>)
                 </button>
-                <button onclick="scrollToForm()" class="bg-taekwondo-red hover:bg-red-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow-lg flex items-center gap-2">
+                <button id="headerRegisterBtn" onclick="scrollToForm()" class="bg-taekwondo-red hover:bg-red-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow-lg flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square"></i> Register Now
                 </button>
             </div>
@@ -126,7 +138,7 @@
         </section>
 
         <!-- Registration Form Section -->
-        <section id="registrationFormSection" class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+        <section id="registrationFormSection" class="relative bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-lg flex items-center gap-2">
@@ -137,6 +149,14 @@
                 <div class="text-right hidden sm:block">
                     <span class="text-xs text-slate-400 block">Estimated Total</span>
                     <span id="headerTotal" class="text-xl font-black text-taekwondo-accent">₱0.00</span>
+                </div>
+            </div>
+
+            <div id="closedOverlay" class="hidden absolute inset-0 z-10 bg-white/90 backdrop-blur-[1px] items-center justify-center p-6 text-center">
+                <div>
+                    <div class="mx-auto w-14 h-14 rounded-full bg-red-100 text-taekwondo-red flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-lock"></i></div>
+                    <h3 class="text-xl font-extrabold text-slate-900">Registration Closed</h3>
+                    <p class="text-sm text-slate-500 mt-1">The registration period has ended. Please contact the team organizer for any concerns.</p>
                 </div>
             </div>
 
@@ -611,6 +631,11 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
 
+            if (registrationClosed) {
+                showToast('Registration Closed', 'Registration has ended. New orders are no longer accepted.', 'error');
+                return;
+            }
+
             const buyJacket = document.getElementById('buyJacket').checked;
             const buyTshirt = document.getElementById('buyTshirt').checked;
 
@@ -931,6 +956,78 @@
             const m = document.getElementById('sizeChartModal'); m.classList.add('hidden'); m.classList.remove('flex');
         }
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSizeChart(); });
+
+        // ---------- Registration countdown (set from the admin page) ----------
+        let registrationClosed = false;
+        let cdDeadline = null, cdTimerId = null;
+
+        function applyClosedState(closed) {
+            registrationClosed = closed;
+            document.getElementById('cdTimer').classList.toggle('hidden', closed);
+            document.getElementById('cdTitle').classList.toggle('hidden', closed);
+            document.getElementById('cdClosed').classList.toggle('hidden', !closed);
+            const ov = document.getElementById('closedOverlay');
+            ov.classList.toggle('hidden', !closed); ov.classList.toggle('flex', closed);
+            const submitBtn = document.querySelector('#gearForm button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = closed;
+            const reg = document.getElementById('headerRegisterBtn');
+            reg.disabled = closed;
+            reg.classList.toggle('opacity-50', closed);
+            reg.classList.toggle('cursor-not-allowed', closed);
+        }
+
+        function tickCountdown() {
+            if (!cdDeadline) return;
+            const ms = cdDeadline.getTime() - Date.now();
+            if (ms <= 0) {
+                applyClosedState(true);
+                clearInterval(cdTimerId); cdTimerId = null;
+                return;
+            }
+            applyClosedState(false);
+            const t = Math.floor(ms / 1000);
+            const pad = (n) => String(n).padStart(2, '0');
+            document.getElementById('cdD').innerText = Math.floor(t / 86400);
+            document.getElementById('cdH').innerText = pad(Math.floor((t % 86400) / 3600));
+            document.getElementById('cdM').innerText = pad(Math.floor((t % 3600) / 60));
+            document.getElementById('cdS').innerText = pad(t % 60);
+        }
+
+        onSnapshot(doc(db, 'settings', 'countdown'), (snap) => {
+            const d = snap.exists() ? snap.data() : {};
+            if (cdTimerId) { clearInterval(cdTimerId); cdTimerId = null; }
+            const box = document.getElementById('countdownBox');
+            const raw = d.deadline;
+            const date = raw ? (typeof raw.toDate === 'function' ? raw.toDate() : new Date(raw)) : null;
+            if (!d.enabled || !date || isNaN(date.getTime())) {
+                cdDeadline = null;
+                box.classList.add('hidden'); box.classList.remove('flex');
+                applyClosedState(false);
+                return;
+            }
+            cdDeadline = date;
+            if (d.title) document.getElementById('cdTitle').innerText = d.title;
+            box.classList.remove('hidden'); box.classList.add('flex');
+            tickCountdown();
+            if (cdDeadline && !registrationClosed) cdTimerId = setInterval(tickCountdown, 1000);
+        }, (err) => console.error('Countdown error:', err));
+
+        // Keep the header (with the countdown) pinned while scrolling; shrink it a little once scrolled
+        (function () {
+            const inner = document.getElementById('headerInner');
+            let compact = false;
+            function onScroll() {
+                const should = window.scrollY > 40;
+                if (should === compact) return;
+                compact = should;
+                inner.classList.toggle('py-6', !compact);
+                inner.classList.toggle('py-2', compact);
+                inner.classList.toggle('gap-4', !compact);
+                inner.classList.toggle('gap-2', compact);
+            }
+            window.addEventListener('scroll', onScroll, { passive: true });
+            onScroll();
+        })();
 
         Object.assign(window, {
             scrollToForm, toggleJacketOptions, toggleTshirtOptions, toggleFulfillment,
