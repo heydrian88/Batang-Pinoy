@@ -839,15 +839,17 @@
         // ---------- Size charts ----------
         // Fill in the real measurements below. Nothing is shown until rows are provided.
         const SIZE_CHARTS = {
-            jacket: { title: 'Team Jacket Size Chart', unit: '', columns: [], rows: [], note: '' },
-            tshirt: { title: 'Team T-Shirt Size Chart', unit: '', columns: [], rows: [], note: '' }
+            jacket: { title: 'Team Jacket Size Chart', image: 'size-jacket.jpg', unit: '', columns: [], rows: [], note: '' },
+            tshirt: { title: 'Team T-Shirt Size Chart', image: 'size-tshirt.jpg', unit: '', columns: [], rows: [], note: '' }
         };
         function openSizeChart(kind) {
             const c = SIZE_CHARTS[kind]; if (!c) return;
             document.getElementById('scTitle').innerHTML = '<i class="fa-solid fa-ruler-combined text-taekwondo-accent"></i> ' + esc(c.title);
             document.getElementById('scSub').innerText = c.unit ? 'Measurements in ' + c.unit : '';
             const body = document.getElementById('scBody');
-            if (c.columns.length && c.rows.length) {
+            if (c.image) {
+                body.innerHTML = `<img src="${c.image}" alt="${esc(c.title)}" onclick="zoomSizeChart(this.src)" onerror="this.parentNode.innerHTML='<div class=&quot;text-center py-10 text-sm text-slate-500&quot;>Size chart coming soon.</div>'" class="w-full h-auto rounded-xl border border-slate-200 cursor-zoom-in">`;
+            } else if (c.columns.length && c.rows.length) {
                 body.innerHTML = `<div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm text-center whitespace-nowrap">
                     <thead><tr class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider">${c.columns.map((h, i) => `<th class="p-3 font-bold ${i === 0 ? 'sticky left-0 bg-slate-100 text-left' : ''}">${esc(h)}</th>`).join('')}</tr></thead>
                     <tbody class="divide-y divide-slate-200">${c.rows.map(r => `<tr>${r.map((v, i) => `<td class="p-3 ${i === 0 ? 'sticky left-0 bg-white text-left font-extrabold text-taekwondo-blue' : 'text-slate-700'}">${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody>
@@ -858,6 +860,11 @@
             const note = document.getElementById('scNote');
             note.innerText = c.note || ''; note.classList.toggle('hidden', !c.note);
             const m = document.getElementById('sizeChartModal'); m.classList.remove('hidden'); m.classList.add('flex');
+        }
+        function zoomSizeChart(src) {
+            document.getElementById('lightboxImg').src = src;
+            const lb = document.getElementById('lightbox');
+            lb.classList.remove('hidden'); lb.classList.add('flex');
         }
         function closeSizeChart() {
             const m = document.getElementById('sizeChartModal'); m.classList.add('hidden'); m.classList.remove('flex');
@@ -1005,7 +1012,7 @@
 
         Object.assign(window, {
             scrollToForm, toggleJacketOptions, toggleTshirtOptions, toggleFulfillment,
-            handleFormSubmit, toggleProofGate, updateCalculation, openSizeChart, closeSizeChart, previewProof, closeReceipt, copyGcash, swapImage, openLightbox, closeLightbox
+            handleFormSubmit, toggleProofGate, updateCalculation, openSizeChart, closeSizeChart, zoomSizeChart, previewProof, closeReceipt, copyGcash, swapImage, openLightbox, closeLightbox
         });
     </script>
 </body>
