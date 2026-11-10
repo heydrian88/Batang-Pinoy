@@ -73,9 +73,6 @@
                 <div id="cdClosed" class="hidden bg-taekwondo-red text-white text-sm font-black uppercase tracking-widest px-5 py-2.5 rounded-lg shadow-lg"><i class="fa-solid fa-lock"></i> Registration Closed</div>
             </div>
             <div class="flex items-center space-x-3">
-                <button onclick="openMySubmissions()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold px-4 py-2.5 rounded-lg transition flex items-center gap-2 shadow">
-                    <i class="fa-solid fa-users-gear"></i> View Submissions (<span id="mySubCount">0</span>)
-                </button>
                 <button id="headerRegisterBtn" onclick="scrollToForm()" class="bg-taekwondo-red hover:bg-red-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow-lg flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square"></i> Register Now
                 </button>
@@ -102,8 +99,8 @@
             <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </section>
 
-        <!-- Important Disclaimer Banner / Card -->
-        <section class="bg-amber-50 border-l-4 border-amber-500 rounded-2xl p-6 shadow-md relative overflow-hidden">
+        <!-- Important Reminders & Guidelines (content is edited from the admin page) -->
+        <section id="remindersSection" class="hidden bg-amber-50 border-l-4 border-amber-500 rounded-2xl p-6 shadow-md relative overflow-hidden">
             <div class="absolute -right-6 -bottom-6 text-amber-100 opacity-50 text-9xl pointer-events-none">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
@@ -113,26 +110,13 @@
                 </div>
                 <div class="space-y-3 flex-1">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <h2 class="text-lg font-bold text-amber-900">Important Reminders & Guidelines</h2>
-                        <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full w-fit">
-                            <i class="fa-regular fa-clock"></i> Deadline: Nov 11, 2026
+                        <h2 id="remTitle" class="text-lg font-bold text-amber-900">Important Reminders & Guidelines</h2>
+                        <span id="remBadge" class="hidden bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full w-fit">
+                            <i class="fa-regular fa-clock"></i> <span id="remBadgeText"></span>
                         </span>
                     </div>
-                    <ul class="text-sm text-amber-900/90 space-y-2 list-disc list-inside leading-relaxed">
-                        <li><strong>Payment Deadline:</strong> November 11, 2026 (Wednesday). Please settle payments on or before this date.</li>
-                        <li><strong>Production Lead Time:</strong> Approximately 12–15 days (excluding Sundays and holidays).</li>
-                        <li><strong>At-Cost Pricing:</strong> No markup has been added to the prices. This is strictly to help our team look more presentable, uniform, and professional.</li>
-                        <li><strong>Fulfillment & Delivery:</strong> Delivery fee is shouldered individually by each person, OR you may opt for direct store pickup.</li>
-                        <li>
-                            <strong>Supplier Details:</strong> <span class="font-semibold text-amber-950">KALOSph Las Piñas</span><br>
-                            <span class="text-xs text-amber-900/80 ml-5 block mt-0.5">
-                                <i class="fa-solid fa-phone text-amber-700"></i> Contact: 09620485439 &nbsp;|&nbsp; 
-                                <i class="fa-solid fa-location-dot text-amber-700"></i> Address: #17 Las Piñas Commercial Complex, Talon Uno Las Piñas City. 
-                                (<a href="https://maps.google.com/?q=KALOSph+Las+Piñas" target="_blank" class="text-blue-700 underline font-semibold hover:text-blue-900">Google Maps</a>)
-                            </span>
-                        </li>
-                    </ul>
-                    <p class="text-xs text-amber-800 italic pt-1 font-medium">Thank you for your support and cooperation!</p>
+                    <ul id="remList" class="text-sm text-amber-900/90 space-y-2 list-disc list-inside leading-relaxed"></ul>
+                    <p id="remNote" class="hidden text-xs text-amber-800 italic pt-1 font-medium"></p>
                 </div>
             </div>
         </section>
@@ -318,7 +302,7 @@
                 <div id="gcashSection" class="bg-white rounded-2xl border-2 border-blue-200 overflow-hidden">
                     <div class="bg-blue-600 text-white px-6 py-4">
                         <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-wallet"></i> Step 1: Pay via GCash</h3>
-                        <p class="text-xs text-blue-100">Scan the QR code or send your payment to the account below. Deadline: November 11, 2026.</p>
+                        <p class="text-xs text-blue-100">Scan the QR code or send your payment to the account below.</p>
                     </div>
                     <div id="gcashBody" class="p-6 flex flex-col sm:flex-row items-center gap-6">
                         <div id="gcashQrBox" class="w-48 h-48 shrink-0 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-center text-xs text-slate-400 overflow-hidden">
@@ -397,23 +381,6 @@
         <img id="lightboxImg" src="" alt="" class="max-h-[90vh] max-w-full rounded-xl shadow-2xl">
     </div>
 
-    <!-- My Submissions Modal (this device only) -->
-    <div id="mySubModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[65] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <div>
-                    <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-list-check text-taekwondo-accent"></i> My Submissions</h3>
-                    <p class="text-xs text-slate-400">Your registrations submitted from this device.</p>
-                </div>
-                <button onclick="closeMySubmissions()" class="text-slate-400 hover:text-white p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div id="mySubBody" class="p-5 overflow-y-auto flex-grow space-y-3 bg-slate-50"></div>
-            <div class="px-6 py-3 border-t border-slate-200 text-[11px] text-slate-500">
-                Payment status shown is what you selected when you submitted. Contact KALOSph Las Piñas (09620485439) for payment confirmation.
-            </div>
-        </div>
-    </div>
-
     <!-- Order Receipt / Submission Summary -->
     <div id="receiptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] hidden items-center justify-center p-4">
         <div id="receiptCard" class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto">
@@ -449,10 +416,7 @@
                     <div><span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block">Fulfillment</span><p id="rcFulfillment" class="font-semibold text-slate-800"></p></div>
                     <div><span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block">Payment Status</span><p id="rcPayment" class="font-semibold text-slate-800"></p></div>
                 </div>
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 leading-relaxed">
-                    <strong>Reminder:</strong> Payment deadline is <strong>November 11, 2026</strong>. Production takes about 12–15 days (excluding Sundays and holidays).
-                    Supplier: KALOSph Las Piñas, <strong>09620485439</strong>.
-                </div>
+                <div id="rcNote" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 leading-relaxed whitespace-pre-line"></div>
                 <div class="flex gap-2 pt-1">
                     <button onclick="window.print()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-lg text-sm"><i class="fa-solid fa-print"></i> Print</button>
                     <button onclick="closeReceipt()" class="flex-1 bg-taekwondo-blue hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg text-sm">Done</button>
@@ -498,13 +462,11 @@
         const registrationsRef = collection(db, 'registrations');
 
         // Prices
-        const MY_KEY = 'batang_pinoy_my_submissions_2026';
         const PRICE_JACKET = 1100;
         const PRICE_TSHIRT = 500;
 
         updateCalculation();
         toggleProofGate();
-        updateMyCount();
 
         // Scroll to form helper
         function scrollToForm() {
@@ -703,8 +665,6 @@
             }
             submitBtn.disabled = false; submitBtn.innerHTML = submitLabel;
 
-            // Keep a copy on this device so the customer can see it under "View Submissions"
-            saveMine(record);
 
             // Reset Form
             document.getElementById('gearForm').reset();
@@ -738,13 +698,15 @@
             set('rcJacketBackPrint', jacketBackPrint ? 'Back print: ' + jacketBackPrint : '');
             set('rcTshirtSize', 'Size: ' + tshirtSize + ' · Qty: ' + tq);
             set('rcBackPrint', backPrint ? 'Back print: ' + backPrint : '');
+            const rn = document.getElementById('rcNote');
+            rn.innerHTML = richText(receiptNoteText);
+            rn.classList.toggle('hidden', !receiptNoteText);
             const m = document.getElementById('receiptModal');
             m.classList.remove('hidden'); m.classList.add('flex');
         }
         function closeReceipt() {
             const m = document.getElementById('receiptModal');
             m.classList.add('hidden'); m.classList.remove('flex');
-            openMySubmissions();
         }
 
         // Toast Notification Helper
@@ -830,47 +792,6 @@
         function closeLightbox() {
             const lb = document.getElementById('lightbox');
             lb.classList.add('hidden'); lb.classList.remove('flex');
-        }
-
-        // ---------- My Submissions (read-only, stored on this device only) ----------
-        function loadMine() {
-            try { return JSON.parse(localStorage.getItem(MY_KEY)) || []; } catch (e) { return []; }
-        }
-        function saveMine(record) {
-            const list = loadMine(); list.push(record);
-            try { localStorage.setItem(MY_KEY, JSON.stringify(list)); } catch (e) { console.warn(e); }
-            updateMyCount();
-        }
-        function updateMyCount() {
-            document.getElementById('mySubCount').innerText = loadMine().length;
-        }
-        function openMySubmissions() {
-            const list = loadMine().slice().reverse();
-            const e = (t) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            document.getElementById('mySubBody').innerHTML = list.length ? list.map(r => `
-                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2 text-sm">
-                    <div class="flex justify-between items-start gap-2">
-                        <div>
-                            <p class="font-extrabold text-slate-900">${e(r.fullName)}</p>
-                            <p class="text-[11px] text-slate-400">${e(r.id)} · ${e(r.date)}</p>
-                        </div>
-                        <span class="text-xs font-bold px-2 py-0.5 rounded whitespace-nowrap ${r.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">Payment Status: ${e(r.paymentStatus)}</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="bg-slate-50 rounded-lg p-2.5"><span class="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">Jacket</span>
-                            ${e(r.jacket)}${r.jacketQty > 1 ? ' × ' + r.jacketQty : ''}${r.jacketBackPrint ? `<span class="block text-taekwondo-blue font-bold">Back: ${e(r.jacketBackPrint)}</span>` : ''}</div>
-                        <div class="bg-slate-50 rounded-lg p-2.5"><span class="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">T-Shirt</span>
-                            ${e(r.tshirt)}${r.tshirtQty > 1 ? ' × ' + r.tshirtQty : ''}${r.backPrint ? `<span class="block text-taekwondo-blue font-bold">Back: ${e(r.backPrint)}</span>` : ''}</div>
-                    </div>
-                    <div class="flex justify-between text-xs text-slate-600">
-                        <span>${e(r.deliveryNote)}</span>
-                        <span class="font-black text-taekwondo-blue text-sm">₱${Number(r.total || 0).toLocaleString()}</span>
-                    </div>
-                </div>`).join('') : '<div class="text-center py-12 text-sm text-slate-500">No submissions yet from this device.</div>';
-            const m = document.getElementById('mySubModal'); m.classList.remove('hidden'); m.classList.add('flex');
-        }
-        function closeMySubmissions() {
-            const m = document.getElementById('mySubModal'); m.classList.add('hidden'); m.classList.remove('flex');
         }
 
         // ---------- GCash payment details (set from the admin page) ----------
@@ -1029,9 +950,32 @@
             onScroll();
         })();
 
+        // ---------- Reminders & Guidelines (edited from the admin page) ----------
+        let receiptNoteText = '';
+        // Safe formatting: **bold** and clickable web links
+        function richText(t) {
+            return esc(t)
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" class="text-blue-700 underline font-semibold hover:text-blue-900">$1</a>');
+        }
+        onSnapshot(doc(db, 'settings', 'reminders'), (snap) => {
+            const d = snap.exists() ? snap.data() : {};
+            const items = Array.isArray(d.items) ? d.items.filter(Boolean) : [];
+            receiptNoteText = d.receiptNote || '';
+            const sec = document.getElementById('remindersSection');
+            if (!items.length && !d.badge && !d.note) { sec.classList.add('hidden'); return; }
+            document.getElementById('remTitle').innerText = d.title || 'Important Reminders & Guidelines';
+            document.getElementById('remBadgeText').innerText = d.badge || '';
+            document.getElementById('remBadge').classList.toggle('hidden', !d.badge);
+            document.getElementById('remList').innerHTML = items.map(t => `<li>${richText(t)}</li>`).join('');
+            const note = document.getElementById('remNote');
+            note.innerText = d.note || ''; note.classList.toggle('hidden', !d.note);
+            sec.classList.remove('hidden');
+        }, (err) => console.error('Reminders error:', err));
+
         Object.assign(window, {
             scrollToForm, toggleJacketOptions, toggleTshirtOptions, toggleFulfillment,
-            handleFormSubmit, toggleProofGate, updateCalculation, openSizeChart, closeSizeChart, previewProof, closeReceipt, copyGcash, openQr, openMySubmissions, closeMySubmissions, swapImage, openLightbox, closeLightbox
+            handleFormSubmit, toggleProofGate, updateCalculation, openSizeChart, closeSizeChart, previewProof, closeReceipt, copyGcash, openQr, swapImage, openLightbox, closeLightbox
         });
     </script>
 </body>

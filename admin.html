@@ -64,6 +64,7 @@
                 <button id="tabOrders" onclick="showTab('orders')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-list-check"></i> Orders (<span id="orderCount">0</span>)</button>
                 <button id="tabPayment" onclick="showTab('payment')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-wallet"></i> GCash Payment</button>
                 <button id="tabCountdown" onclick="showTab('countdown')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-hourglass-half"></i> Countdown</button>
+                <button id="tabReminders" onclick="showTab('reminders')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-circle-exclamation"></i> Reminders</button>
             </div>
 
             <!-- ===== Products tab ===== -->
@@ -178,6 +179,34 @@
                     </div>
                     <div id="cdStatus" class="text-xs font-semibold rounded-lg px-3 py-2 bg-slate-100 text-slate-600">No countdown set.</div>
                     <button id="cdSaveBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm">Save Countdown</button>
+                </form>
+            </div>
+            <!-- ===== Reminders tab ===== -->
+            <div id="remindersTab" class="hidden max-w-2xl bg-white rounded-2xl shadow p-6">
+                <h2 class="font-extrabold text-slate-900 mb-1">Important Reminders & Guidelines</h2>
+                <p class="text-xs text-slate-500 mb-4">This is the yellow box on the main page. If you leave the reminders and the deadline badge empty, the box is hidden.</p>
+                <form id="remindersForm" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Heading</label>
+                        <input id="rTitle" maxlength="80" placeholder="Important Reminders & Guidelines" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Deadline badge (red label, optional)</label>
+                        <input id="rBadge" maxlength="60" placeholder="e.g. Deadline: your date here" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Reminders (one per line)</label>
+                        <textarea id="rItems" rows="9" placeholder="One reminder per line.&#10;Use **double asterisks** for bold, e.g. **Payment Deadline:** your text.&#10;Web links become clickable automatically." class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Closing message (optional)</label>
+                        <input id="rNote" maxlength="160" placeholder="e.g. Thank you for your support!" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600">Note shown on the customer's order receipt (optional)</label>
+                        <textarea id="rReceipt" rows="3" maxlength="400" placeholder="Leave empty to show no note on the receipt." class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+                    </div>
+                    <button id="rSaveBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm">Save Reminders</button>
                 </form>
             </div>
         </main>
@@ -341,6 +370,14 @@
                 }
                 if (gcash.qr && !$('gQrFile').files.length) { $('gQrPreview').src = gcash.qr; $('gQrPreview').classList.remove('hidden'); }
             }));
+            unsubscribers.push(onSnapshot(doc(db, 'settings', 'reminders'), (snap) => {
+                const d = snap.exists() ? snap.data() : {};
+                const busy = ['rTitle', 'rBadge', 'rItems', 'rNote', 'rReceipt'].some(id => document.activeElement === $(id));
+                if (busy) return;
+                $('rTitle').value = d.title || ''; $('rBadge').value = d.badge || '';
+                $('rItems').value = Array.isArray(d.items) ? d.items.join('\n') : '';
+                $('rNote').value = d.note || ''; $('rReceipt').value = d.receiptNote || '';
+            }, (e) => console.error(e)));
             unsubscribers.push(onSnapshot(doc(db, 'settings', 'countdown'), (snap) => {
                 countdownCfg = snap.exists() ? snap.data() : {};
                 fillCountdownForm();
@@ -358,6 +395,8 @@
             $('ordersTab').classList.toggle('hidden', name !== 'orders');
             $('paymentTab').classList.toggle('hidden', name !== 'payment');
             $('countdownTab').classList.toggle('hidden', name !== 'countdown');
+            $('remindersTab').classList.toggle('hidden', name !== 'reminders');
+            $('tabReminders').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'reminders' ? on : off);
             $('tabCountdown').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'countdown' ? on : off);
             $('tabPayment').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'payment' ? on : off);
             $('tabProducts').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'products' ? on : off);
@@ -656,6 +695,26 @@
             } finally { btn.disabled = false; btn.innerText = 'Save Countdown'; }
         });
         setInterval(() => { if (countdownCfg.deadline) fillCountdownForm(); }, 30000);
+
+        // ---------------- Reminders & Guidelines ----------------
+        $('remindersForm').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const btn = $('rSaveBtn'); btn.disabled = true; btn.innerText = 'Saving...';
+            try {
+                const data = {
+                    title: $('rTitle').value.trim(),
+                    badge: $('rBadge').value.trim(),
+                    items: $('rItems').value.split('\n').map(t => t.trim()).filter(Boolean),
+                    note: $('rNote').value.trim(),
+                    receiptNote: $('rReceipt').value.trim()
+                };
+                await setDoc(doc(db, 'settings', 'reminders'), data);
+                toast('Saved', 'Reminders are updated on the main page.');
+            } catch (err) {
+                console.error(err);
+                toast('Save failed', errMsg(err, 'Check your login and Firestore rules.'));
+            } finally { btn.disabled = false; btn.innerText = 'Save Reminders'; }
+        });
 
         // ---------------- GCash payment details ----------------
         $('gQrFile').addEventListener('change', () => {
