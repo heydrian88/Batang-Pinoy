@@ -125,33 +125,6 @@
             </div>
         </section>
 
-        <!-- GCash Payment Details -->
-        <section id="gcashSection" class="bg-white rounded-2xl shadow-xl border-2 border-blue-200 overflow-hidden">
-            <div class="bg-blue-600 text-white px-6 py-4">
-                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-wallet"></i> Pay via GCash</h3>
-                <p class="text-xs text-blue-100">Scan the QR code or send your payment to the account below. Deadline: November 11, 2026.</p>
-            </div>
-            <div id="gcashBody" class="p-6 flex flex-col sm:flex-row items-center gap-6">
-                <div id="gcashQrBox" class="w-48 h-48 shrink-0 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-center text-xs text-slate-400 overflow-hidden">
-                    QR code<br>coming soon
-                </div>
-                <div class="flex-1 w-full space-y-4">
-                    <div>
-                        <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block">Account Name</span>
-                        <p id="gcashName" class="text-lg font-extrabold text-slate-900">—</p>
-                    </div>
-                    <div>
-                        <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block">GCash Number</span>
-                        <div class="flex items-center gap-3">
-                            <p id="gcashNumber" class="text-2xl font-black text-taekwondo-blue tracking-wide">—</p>
-                            <button id="gcashCopy" onclick="copyGcash()" class="hidden text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg"><i class="fa-regular fa-copy"></i> Copy</button>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-500">Please pay the exact total shown on the form below.</p>
-                </div>
-            </div>
-        </section>
-
         <!-- Registration Form Section -->
         <section id="registrationFormSection" class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -204,7 +177,7 @@
                             <label for="jacketSize" class="block text-xs font-semibold text-slate-700 mb-1">
                                 Select Jacket Size <span class="text-red-500">*</span>
                             </label>
-                            <select id="jacketSize" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                            <select id="jacketSize" onchange="updateCalculation()" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
                                 <option value="">-- Choose Size --</option>
                                 <option value="S">S</option>
                                 <option value="M">M</option>
@@ -213,6 +186,9 @@
                                 <option value="2XL">2XL</option>
                                 <option value="3XL">3XL</option>
                             </select>
+                            <button type="button" onclick="openSizeChart('jacket')" class="pointer-events-auto mt-1.5 text-xs font-bold text-taekwondo-blue hover:text-blue-800 underline inline-flex items-center gap-1">
+                                <i class="fa-solid fa-ruler-combined"></i> View Size Chart
+                            </button>
 
                             <label for="jacketBackPrint" class="block text-xs font-semibold text-slate-700 mt-4 mb-1">
                                 Back Print Name (Surname / Name) <span class="text-red-500">*</span>
@@ -220,6 +196,11 @@
                             <input type="text" id="jacketBackPrint" maxlength="20" autocomplete="off" placeholder="e.g., DELA CRUZ"
                                 class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm uppercase focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
                             <p class="text-[11px] text-slate-500 mt-1">This will be printed on the back of your jacket (max 20 characters). Please double-check the spelling.</p>
+
+                            <label for="jacketQty" class="block text-xs font-semibold text-slate-700 mt-4 mb-1">Quantity</label>
+                            <input type="number" id="jacketQty" min="1" max="10" value="1" inputmode="numeric" oninput="updateCalculation()"
+                                class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                            <p class="text-[11px] text-slate-500 mt-1">The same size and back print apply to every jacket in this order. For different sizes or names, submit a separate order.</p>
                         </div>
                     </div>
 
@@ -241,7 +222,7 @@
                             <label for="tshirtSize" class="block text-xs font-semibold text-slate-700 mb-1">
                                 Select T-Shirt Size <span class="text-red-500">*</span>
                             </label>
-                            <select id="tshirtSize" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                            <select id="tshirtSize" onchange="updateCalculation()" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
                                 <option value="">-- Choose Size --</option>
                                 <option value="S">S</option>
                                 <option value="M">M</option>
@@ -250,6 +231,9 @@
                                 <option value="2XL">2XL</option>
                                 <option value="3XL">3XL</option>
                             </select>
+                            <button type="button" onclick="openSizeChart('tshirt')" class="pointer-events-auto mt-1.5 text-xs font-bold text-taekwondo-blue hover:text-blue-800 underline inline-flex items-center gap-1">
+                                <i class="fa-solid fa-ruler-combined"></i> View Size Chart
+                            </button>
 
                             <label for="backPrint" class="block text-xs font-semibold text-slate-700 mt-4 mb-1">
                                 Back Print Name (Surname / Name) <span class="text-red-500">*</span>
@@ -257,6 +241,11 @@
                             <input type="text" id="backPrint" maxlength="20" autocomplete="off" placeholder="e.g., DELA CRUZ"
                                 class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm uppercase focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
                             <p class="text-[11px] text-slate-500 mt-1">This will be printed on the back of your t-shirt (max 20 characters). Please double-check the spelling.</p>
+
+                            <label for="tshirtQty" class="block text-xs font-semibold text-slate-700 mt-4 mb-1">Quantity</label>
+                            <input type="number" id="tshirtQty" min="1" max="10" value="1" inputmode="numeric" oninput="updateCalculation()"
+                                class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
+                            <p class="text-[11px] text-slate-500 mt-1">The same size and back print apply to every t-shirt in this order. For different sizes or names, submit a separate order.</p>
                         </div>
                     </div>
 
@@ -293,24 +282,67 @@
                     </div>
                 </div>
 
-                <!-- Proof of Payment -->
-                <div class="border-2 border-blue-200 bg-blue-50/50 rounded-2xl p-5">
-                    <label for="proofFile" class="block text-sm font-bold text-slate-800 mb-1">
-                        <i class="fa-solid fa-receipt text-taekwondo-blue"></i> Proof of Payment <span class="text-red-500">*</span>
-                    </label>
-                    <p class="text-xs text-slate-600 mb-3">Pay through GCash using the QR code above, then upload a screenshot of your successful payment here. You can only submit your order once the proof is attached.</p>
-                    <input type="file" id="proofFile" accept="image/*" required onchange="previewProof()"
-                        class="w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-taekwondo-blue file:text-white file:font-bold file:text-xs hover:file:bg-blue-800 bg-white border border-slate-300 rounded-xl p-2">
-                    <div id="proofPreviewWrap" class="hidden mt-3">
-                        <img id="proofPreview" alt="Proof of payment preview" class="max-h-56 rounded-xl border border-slate-200 bg-white">
+                <!-- Order Summary -->
+                <div class="pt-2">
+                    <div class="bg-slate-100 rounded-xl overflow-hidden">
+                        <div class="px-4 py-3 border-b border-slate-200 text-sm font-bold text-slate-700"><i class="fa-solid fa-receipt text-taekwondo-blue"></i> Order Summary</div>
+                        <div id="orderSummaryLines" class="divide-y divide-slate-200 text-sm"></div>
+                        <div class="p-4 flex items-center justify-between">
+                            <span class="text-sm font-semibold text-slate-600">Total Amount:</span>
+                            <span id="calculatedTotal" class="text-xl font-black text-taekwondo-blue">₱0.00</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Total -->
-                <div class="pt-2">
-                    <div class="bg-slate-100 rounded-xl p-4 flex items-center justify-between">
-                        <span class="text-sm font-semibold text-slate-600">Total Amount:</span>
-                        <span id="calculatedTotal" class="text-xl font-black text-taekwondo-blue">₱0.00</span>
+                <!-- GCash Payment Details (moved into the form; shown before Proof of Payment) -->
+                <div id="gcashSection" class="bg-white rounded-2xl border-2 border-blue-200 overflow-hidden">
+                    <div class="bg-blue-600 text-white px-6 py-4">
+                        <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-wallet"></i> Step 1: Pay via GCash</h3>
+                        <p class="text-xs text-blue-100">Scan the QR code or send your payment to the account below. Deadline: November 11, 2026.</p>
+                    </div>
+                    <div id="gcashBody" class="p-6 flex flex-col sm:flex-row items-center gap-6">
+                        <div id="gcashQrBox" class="w-48 h-48 shrink-0 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-center text-xs text-slate-400 overflow-hidden">
+                            QR code<br>coming soon
+                        </div>
+                        <div class="flex-1 w-full space-y-4">
+                            <div>
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block">Account Name</span>
+                                <p id="gcashName" class="text-lg font-extrabold text-slate-900">—</p>
+                            </div>
+                            <div>
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block">GCash Number</span>
+                                <div class="flex items-center gap-3">
+                                    <p id="gcashNumber" class="text-2xl font-black text-taekwondo-blue tracking-wide">—</p>
+                                    <button type="button" id="gcashCopy" onclick="copyGcash()" class="hidden text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg"><i class="fa-regular fa-copy"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-amber-700 block">Exact Amount to Pay</span>
+                                <p id="gcashAmount" class="text-2xl font-black text-slate-900">₱0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment confirmation -->
+                <label class="flex items-start gap-3 border-2 border-slate-200 rounded-2xl p-4 cursor-pointer hover:border-taekwondo-blue transition bg-slate-50/50">
+                    <input type="checkbox" id="paymentConfirm" required onchange="toggleProofGate()" class="w-5 h-5 mt-0.5 text-taekwondo-blue rounded border-slate-300 focus:ring-taekwondo-blue">
+                    <span class="text-sm font-semibold text-slate-800">I have successfully completed my GCash payment. <span class="text-red-500">*</span>
+                        <span class="block text-xs font-normal text-slate-500 mt-0.5">Your payment is verified by the admin before your order is marked as Paid.</span>
+                    </span>
+                </label>
+
+                <!-- Proof of Payment (locked until the confirmation checkbox is ticked) -->
+                <div id="proofSection" class="border-2 border-blue-200 bg-blue-50/50 rounded-2xl p-5 opacity-40 transition-all">
+                    <label for="proofFile" class="block text-sm font-bold text-slate-800 mb-1">
+                        <i class="fa-solid fa-receipt text-taekwondo-blue"></i> Step 2: Proof of Payment <span class="text-red-500">*</span>
+                    </label>
+                    <p id="proofHint" class="text-xs text-slate-600 mb-3">Complete your GCash payment and tick the confirmation above to unlock this upload. Then attach a screenshot of your successful GCash transaction.</p>
+                    <input type="file" id="proofFile" accept="image/*" disabled onchange="previewProof()"
+                        class="w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-taekwondo-blue file:text-white file:font-bold file:text-xs hover:file:bg-blue-800 bg-white border border-slate-300 rounded-xl p-2 cursor-not-allowed">
+                    <div id="proofPreviewWrap" class="hidden mt-3">
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block mb-1">Preview</span>
+                        <img id="proofPreview" alt="Proof of payment preview" class="max-h-56 rounded-xl border border-slate-200 bg-white">
                     </div>
                 </div>
 
@@ -324,6 +356,21 @@
         </section>
 
     </main>
+
+    <!-- Size Chart Modal -->
+    <div id="sizeChartModal" onclick="if(event.target===this)closeSizeChart()" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[75] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <div>
+                    <h3 id="scTitle" class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-ruler-combined text-taekwondo-accent"></i> Size Chart</h3>
+                    <p id="scSub" class="text-xs text-slate-400"></p>
+                </div>
+                <button type="button" onclick="closeSizeChart()" class="text-slate-400 hover:text-white p-2" aria-label="Close"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="scBody" class="p-5 overflow-auto flex-grow"></div>
+            <div id="scNote" class="px-6 py-3 border-t border-slate-200 text-[11px] text-slate-500 hidden"></div>
+        </div>
+    </div>
 
     <!-- Image Lightbox -->
     <div id="lightbox" onclick="closeLightbox()" class="fixed inset-0 bg-black/80 z-[60] hidden items-center justify-center p-4 cursor-zoom-out">
@@ -367,11 +414,11 @@
                 <div class="border border-slate-200 rounded-xl divide-y divide-slate-200">
                     <div id="rcJacketRow" class="flex justify-between p-3">
                         <div><p class="font-bold text-slate-900">Team Jacket</p><p id="rcJacketSize" class="text-xs text-slate-500"></p><p id="rcJacketBackPrint" class="text-xs text-taekwondo-blue font-bold"></p></div>
-                        <span class="font-bold">₱1,100</span>
+                        <span id="rcJacketPrice" class="font-bold">₱1,100</span>
                     </div>
                     <div id="rcTshirtRow" class="flex justify-between p-3">
                         <div><p class="font-bold text-slate-900">T-Shirt</p><p id="rcTshirtSize" class="text-xs text-slate-500"></p><p id="rcBackPrint" class="text-xs text-taekwondo-blue font-bold"></p></div>
-                        <span class="font-bold">₱500</span>
+                        <span id="rcTshirtPrice" class="font-bold">₱500</span>
                     </div>
                     <div class="flex justify-between p-3 bg-slate-50 rounded-b-xl">
                         <span class="font-bold text-slate-700">Total Amount</span>
@@ -436,6 +483,7 @@
         const PRICE_TSHIRT = 500;
 
         updateCalculation();
+        toggleProofGate();
         updateMyCount();
 
         // Scroll to form helper
@@ -462,6 +510,7 @@
                 select.value = '';
                 jBack.removeAttribute('required');
                 jBack.value = '';
+                document.getElementById('jacketQty').value = 1;
                 card.classList.remove('border-taekwondo-blue', 'bg-white', 'shadow-sm');
             }
             updateCalculation();
@@ -486,6 +535,7 @@
                 select.value = '';
                 backPrint.removeAttribute('required');
                 backPrint.value = '';
+                document.getElementById('tshirtQty').value = 1;
                 card.classList.remove('border-taekwondo-blue', 'bg-white', 'shadow-sm');
             }
             updateCalculation();
@@ -503,21 +553,58 @@
             }
         }
 
-        // Dynamic price calculation
+        // Quantity helper (1-10)
+        function qtyOf(id) {
+            const n = parseInt(document.getElementById(id).value, 10);
+            return Number.isFinite(n) ? Math.min(10, Math.max(1, n)) : 1;
+        }
+
+        // Dynamic price calculation + order summary + GCash amount
         function updateCalculation() {
-            let total = 0;
             const buyJacket = document.getElementById('buyJacket').checked;
             const buyTshirt = document.getElementById('buyTshirt').checked;
+            const jQty = qtyOf('jacketQty'), tQty = qtyOf('tshirtQty');
+            const fmt = (n) => '₱' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            let total = 0, lines = '';
+            if (buyJacket) {
+                total += PRICE_JACKET * jQty;
+                const sz = document.getElementById('jacketSize').value;
+                lines += `<div class="flex justify-between px-4 py-2.5"><span>Team Jacket${sz ? ' (' + esc(sz) + ')' : ''} × ${jQty}</span><span class="font-bold">${fmt(PRICE_JACKET * jQty)}</span></div>`;
+            }
+            if (buyTshirt) {
+                total += PRICE_TSHIRT * tQty;
+                const sz = document.getElementById('tshirtSize').value;
+                lines += `<div class="flex justify-between px-4 py-2.5"><span>T-Shirt${sz ? ' (' + esc(sz) + ')' : ''} × ${tQty}</span><span class="font-bold">${fmt(PRICE_TSHIRT * tQty)}</span></div>`;
+            }
+            if (!lines) lines = '<div class="px-4 py-2.5 text-xs text-slate-500">No items selected yet.</div>';
+            document.getElementById('orderSummaryLines').innerHTML = lines;
 
-            if (buyJacket) total += PRICE_JACKET;
-            if (buyTshirt) total += PRICE_TSHIRT;
-
-            const formatted = '₱' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const formatted = fmt(total);
             const calcTotalEl = document.getElementById('calculatedTotal');
             const headerTotalEl = document.getElementById('headerTotal');
-            
+            const gcashAmountEl = document.getElementById('gcashAmount');
             if (calcTotalEl) calcTotalEl.innerText = formatted;
             if (headerTotalEl) headerTotalEl.innerText = formatted;
+            if (gcashAmountEl) gcashAmountEl.innerText = formatted;
+        }
+
+        // Proof of Payment stays locked until the customer confirms they paid
+        function toggleProofGate() {
+            const ok = document.getElementById('paymentConfirm').checked;
+            const input = document.getElementById('proofFile');
+            const section = document.getElementById('proofSection');
+            input.disabled = !ok;
+            if (ok) {
+                input.setAttribute('required', 'true');
+                input.classList.remove('cursor-not-allowed');
+                section.classList.remove('opacity-40');
+            } else {
+                input.removeAttribute('required');
+                input.classList.add('cursor-not-allowed');
+                section.classList.add('opacity-40');
+                input.value = '';
+                document.getElementById('proofPreviewWrap').classList.add('hidden');
+            }
         }
 
         // Handle Form Submission
@@ -532,7 +619,14 @@
                 return;
             }
 
+            if (!document.getElementById('paymentConfirm').checked) {
+                showToast('Payment Confirmation Required', 'Please confirm that you completed your GCash payment first.', 'error');
+                return;
+            }
+
             const fullName = document.getElementById('fullName').value.trim();
+            const jQty = buyJacket ? qtyOf('jacketQty') : 0;
+            const tQty = buyTshirt ? qtyOf('tshirtQty') : 0;
             const jacketSize = buyJacket ? document.getElementById('jacketSize').value : 'N/A';
             const tshirtSize = buyTshirt ? document.getElementById('tshirtSize').value : 'N/A';
             const jacketBackPrint = buyJacket ? document.getElementById('jacketBackPrint').value.trim().toUpperCase() : '';
@@ -542,8 +636,7 @@
             const paymentStatus = 'Pending'; // admin marks it Paid after confirming payment
 
             let total = 0;
-            if (buyJacket) total += PRICE_JACKET;
-            if (buyTshirt) total += PRICE_TSHIRT;
+            total = PRICE_JACKET * jQty + PRICE_TSHIRT * tQty;
 
             const record = {
                 id: 'BP-' + Date.now().toString().slice(-6),
@@ -553,6 +646,9 @@
                 tshirt: buyTshirt ? `Yes (${tshirtSize})` : 'No',
                 jacketBackPrint,
                 backPrint,
+                jacketQty: jQty,
+                tshirtQty: tQty,
+                customerPaymentConfirmed: true,   // customer's claim only; admin still verifies and sets Paid
                 proofSubmitted: true,
                 fulfillment,
                 deliveryNote,
@@ -590,6 +686,7 @@
             toggleJacketOptions();
             toggleTshirtOptions();
             toggleFulfillment();
+            toggleProofGate();
             updateCalculation();
             document.getElementById('proofPreviewWrap').classList.add('hidden');
 
@@ -609,9 +706,12 @@
             const hasJacket = r.jacket !== 'No', hasTshirt = r.tshirt !== 'No';
             document.getElementById('rcJacketRow').classList.toggle('hidden', !hasJacket);
             document.getElementById('rcTshirtRow').classList.toggle('hidden', !hasTshirt);
-            set('rcJacketSize', 'Size: ' + jacketSize);
+            const jq = r.jacketQty || 1, tq = r.tshirtQty || 1;
+            set('rcJacketSize', 'Size: ' + jacketSize + ' · Qty: ' + jq);
+            set('rcJacketPrice', '₱' + (PRICE_JACKET * jq).toLocaleString('en-US'));
+            set('rcTshirtPrice', '₱' + (PRICE_TSHIRT * tq).toLocaleString('en-US'));
             set('rcJacketBackPrint', jacketBackPrint ? 'Back print: ' + jacketBackPrint : '');
-            set('rcTshirtSize', 'Size: ' + tshirtSize);
+            set('rcTshirtSize', 'Size: ' + tshirtSize + ' · Qty: ' + tq);
             set('rcBackPrint', backPrint ? 'Back print: ' + backPrint : '');
             const m = document.getElementById('receiptModal');
             m.classList.remove('hidden'); m.classList.add('flex');
@@ -733,9 +833,9 @@
                     </div>
                     <div class="grid grid-cols-2 gap-3 text-xs">
                         <div class="bg-slate-50 rounded-lg p-2.5"><span class="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">Jacket</span>
-                            ${e(r.jacket)}${r.jacketBackPrint ? `<span class="block text-taekwondo-blue font-bold">Back: ${e(r.jacketBackPrint)}</span>` : ''}</div>
+                            ${e(r.jacket)}${r.jacketQty > 1 ? ' × ' + r.jacketQty : ''}${r.jacketBackPrint ? `<span class="block text-taekwondo-blue font-bold">Back: ${e(r.jacketBackPrint)}</span>` : ''}</div>
                         <div class="bg-slate-50 rounded-lg p-2.5"><span class="block font-bold text-slate-400 uppercase tracking-widest text-[10px]">T-Shirt</span>
-                            ${e(r.tshirt)}${r.backPrint ? `<span class="block text-taekwondo-blue font-bold">Back: ${e(r.backPrint)}</span>` : ''}</div>
+                            ${e(r.tshirt)}${r.tshirtQty > 1 ? ' × ' + r.tshirtQty : ''}${r.backPrint ? `<span class="block text-taekwondo-blue font-bold">Back: ${e(r.backPrint)}</span>` : ''}</div>
                     </div>
                     <div class="flex justify-between text-xs text-slate-600">
                         <span>${e(r.deliveryNote)}</span>
@@ -804,9 +904,37 @@
             });
         }
 
+        // ---------- Size charts ----------
+        // Fill in the real measurements below. Nothing is shown until rows are provided.
+        const SIZE_CHARTS = {
+            jacket: { title: 'Team Jacket Size Chart', unit: '', columns: [], rows: [], note: '' },
+            tshirt: { title: 'Team T-Shirt Size Chart', unit: '', columns: [], rows: [], note: '' }
+        };
+        function openSizeChart(kind) {
+            const c = SIZE_CHARTS[kind]; if (!c) return;
+            document.getElementById('scTitle').innerHTML = '<i class="fa-solid fa-ruler-combined text-taekwondo-accent"></i> ' + esc(c.title);
+            document.getElementById('scSub').innerText = c.unit ? 'Measurements in ' + c.unit : '';
+            const body = document.getElementById('scBody');
+            if (c.columns.length && c.rows.length) {
+                body.innerHTML = `<div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-sm text-center whitespace-nowrap">
+                    <thead><tr class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider">${c.columns.map((h, i) => `<th class="p-3 font-bold ${i === 0 ? 'sticky left-0 bg-slate-100 text-left' : ''}">${esc(h)}</th>`).join('')}</tr></thead>
+                    <tbody class="divide-y divide-slate-200">${c.rows.map(r => `<tr>${r.map((v, i) => `<td class="p-3 ${i === 0 ? 'sticky left-0 bg-white text-left font-extrabold text-taekwondo-blue' : 'text-slate-700'}">${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody>
+                </table></div>`;
+            } else {
+                body.innerHTML = '<div class="text-center py-10 text-sm text-slate-500">Size chart coming soon.</div>';
+            }
+            const note = document.getElementById('scNote');
+            note.innerText = c.note || ''; note.classList.toggle('hidden', !c.note);
+            const m = document.getElementById('sizeChartModal'); m.classList.remove('hidden'); m.classList.add('flex');
+        }
+        function closeSizeChart() {
+            const m = document.getElementById('sizeChartModal'); m.classList.add('hidden'); m.classList.remove('flex');
+        }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSizeChart(); });
+
         Object.assign(window, {
             scrollToForm, toggleJacketOptions, toggleTshirtOptions, toggleFulfillment,
-            handleFormSubmit, previewProof, closeReceipt, copyGcash, openQr, openMySubmissions, closeMySubmissions, swapImage, openLightbox, closeLightbox
+            handleFormSubmit, toggleProofGate, updateCalculation, openSizeChart, closeSizeChart, previewProof, closeReceipt, copyGcash, openQr, openMySubmissions, closeMySubmissions, swapImage, openLightbox, closeLightbox
         });
     </script>
 </body>

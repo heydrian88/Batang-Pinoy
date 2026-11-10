@@ -177,6 +177,7 @@
                     <label class="flex items-center gap-2 font-bold"><input type="checkbox" id="eJacket" class="w-4 h-4"> Team Jacket (₱1,100)</label>
                     <div class="grid grid-cols-2 gap-2">
                         <select id="eJacketSize" class="border border-slate-300 rounded-lg px-3 py-2 bg-white"></select>
+                        <input id="eJacketQty" type="number" min="1" max="10" placeholder="Qty" class="border border-slate-300 rounded-lg px-3 py-2">
                         <input id="eJacketBack" maxlength="20" placeholder="Back print name" class="border border-slate-300 rounded-lg px-3 py-2 uppercase">
                     </div>
                 </div>
@@ -184,6 +185,7 @@
                     <label class="flex items-center gap-2 font-bold"><input type="checkbox" id="eTshirt" class="w-4 h-4"> T-Shirt (₱500)</label>
                     <div class="grid grid-cols-2 gap-2">
                         <select id="eTshirtSize" class="border border-slate-300 rounded-lg px-3 py-2 bg-white"></select>
+                        <input id="eTshirtQty" type="number" min="1" max="10" placeholder="Qty" class="border border-slate-300 rounded-lg px-3 py-2">
                         <input id="eTshirtBack" maxlength="20" placeholder="Back print name" class="border border-slate-300 rounded-lg px-3 py-2 uppercase">
                     </div>
                 </div>
@@ -455,8 +457,8 @@
             $('ordersBody').innerHTML = orders.map(o => `
                 <tr class="hover:bg-slate-50">
                     <td class="p-3 font-semibold text-slate-800">${esc(o.fullName)}<span class="block text-[10px] text-slate-400 font-normal">${esc(o.date)} · ${esc(o.id)}</span></td>
-                    <td class="p-3">${esc(o.jacket)}${o.jacketBackPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.jacketBackPrint)}</span>` : ''}</td>
-                    <td class="p-3">${esc(o.tshirt)}${o.backPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.backPrint)}</span>` : ''}</td>
+                    <td class="p-3">${esc(o.jacket)}${o.jacketQty > 1 ? ' × ' + o.jacketQty : ''}${o.jacketBackPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.jacketBackPrint)}</span>` : ''}</td>
+                    <td class="p-3">${esc(o.tshirt)}${o.tshirtQty > 1 ? ' × ' + o.tshirtQty : ''}${o.backPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.backPrint)}</span>` : ''}</td>
                     <td class="p-3">${esc(o.fulfillment)}<span class="block text-[10px] text-slate-400">${esc(o.deliveryNote)}</span></td>
                     <td class="p-3 font-bold">₱${Number(o.total || 0).toLocaleString()}</td>
                     <td class="p-3">${o.proof
@@ -497,8 +499,8 @@
         function exportToCSV() {
             if (!orders.length) { alert('No data available to export.'); return; }
             const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-            let csv = 'ID,Date,Full Name,Jacket,Jacket Back Print Name,T-Shirt,T-Shirt Back Print Name,Fulfillment Method,Details,Payment Status,Proof Uploaded,Total Amount (PHP)\r\n';
-            orders.forEach(o => { csv += [o.id, o.date, q(o.fullName), q(o.jacket), q(o.jacketBackPrint), q(o.tshirt), q(o.backPrint), q(o.fulfillment), q(o.deliveryNote), o.paymentStatus, o.proof ? 'Yes' : 'No', o.total].join(',') + '\r\n'; });
+            let csv = 'ID,Date,Full Name,Jacket,Jacket Back Print Name,T-Shirt,T-Shirt Back Print Name,Fulfillment Method,Details,Payment Status,Proof Uploaded,Total Amount (PHP),Jacket Qty,T-Shirt Qty,Customer Confirmed Payment\r\n';
+            orders.forEach(o => { csv += [o.id, o.date, q(o.fullName), q(o.jacket), q(o.jacketBackPrint), q(o.tshirt), q(o.backPrint), q(o.fulfillment), q(o.deliveryNote), o.paymentStatus, o.proof ? 'Yes' : 'No', o.total, o.jacketQty || (o.jacket && o.jacket !== 'No' ? 1 : 0), o.tshirtQty || (o.tshirt && o.tshirt !== 'No' ? 1 : 0), o.customerPaymentConfirmed ? 'Yes' : 'No'].join(',') + '\r\n'; });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
             a.download = 'Batang_Pinoy_Taekwondo_Registrations.csv';
@@ -524,6 +526,8 @@
             $('eTshirt').checked = !!r.tshirt && r.tshirt !== 'No';
             fillSizeSelect('eJacketSize', sizeOf(r.jacket));
             fillSizeSelect('eTshirtSize', sizeOf(r.tshirt));
+            $('eJacketQty').value = r.jacketQty || 1;
+            $('eTshirtQty').value = r.tshirtQty || 1;
             $('eJacketBack').value = r.jacketBackPrint || '';
             $('eTshirtBack').value = r.backPrint || '';
             $('eFulfillment').value = r.fulfillment === 'Store Pickup' ? 'Store Pickup' : 'Delivery';
@@ -543,7 +547,10 @@
             if (buyJ && (!$('eJacketSize').value || !$('eJacketBack').value.trim())) { alert('Jacket needs a size and back print name.'); return; }
             if (buyT && (!$('eTshirtSize').value || !$('eTshirtBack').value.trim())) { alert('T-Shirt needs a size and back print name.'); return; }
             const fulfillment = $('eFulfillment').value;
+            const clampQ = (v) => Math.min(10, Math.max(1, parseInt(v, 10) || 1));
+            const jQ = buyJ ? clampQ($('eJacketQty').value) : 0, tQ = buyT ? clampQ($('eTshirtQty').value) : 0;
             const data = {
+                jacketQty: jQ, tshirtQty: tQ,
                 fullName: $('eName').value.trim(),
                 jacket: buyJ ? `Yes (${$('eJacketSize').value})` : 'No',
                 jacketBackPrint: buyJ ? $('eJacketBack').value.trim().toUpperCase() : '',
@@ -552,7 +559,7 @@
                 fulfillment,
                 deliveryNote: fulfillment === 'Delivery' ? 'Delivery (Contact 09620485439)' : 'Store Pickup (KALOSph)',
                 paymentStatus: $('ePayment').value,
-                total: (buyJ ? PRICE_JACKET : 0) + (buyT ? PRICE_TSHIRT : 0)
+                total: PRICE_JACKET * jQ + PRICE_TSHIRT * tQ
             };
             const btn = $('eSaveBtn'); btn.disabled = true; btn.innerText = 'Saving...';
             try {
