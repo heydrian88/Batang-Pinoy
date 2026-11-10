@@ -958,16 +958,38 @@
                 .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                 .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" class="text-blue-700 underline font-semibold hover:text-blue-900">$1</a>');
         }
+        // Supplier details shown at the end of the reminders list (edited from the admin page).
+        // Until the admin saves their own, the original supplier details are used.
+        const DEFAULT_SUPPLIER = {
+            name: 'KALOSph Las Piñas',
+            contact: '09620485439',
+            address: '#17 Las Piñas Commercial Complex, Talon Uno Las Piñas City',
+            mapUrl: 'https://maps.google.com/?q=KALOSph+Las+Piñas'
+        };
+        function supplierHtml(sp) {
+            if (!sp || !(sp.name || sp.contact || sp.address || sp.mapUrl)) return '';
+            const safeUrl = /^https?:\/\//i.test(sp.mapUrl || '') ? sp.mapUrl : '';
+            const bits = [];
+            if (sp.contact) bits.push(`<i class="fa-solid fa-phone text-amber-700"></i> Contact: ${esc(sp.contact)}`);
+            if (sp.address) bits.push(`<i class="fa-solid fa-location-dot text-amber-700"></i> Address: ${esc(sp.address)}` +
+                (safeUrl ? ` (<a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="text-blue-700 underline font-semibold hover:text-blue-900">Google Maps</a>)` : ''));
+            else if (safeUrl) bits.push(`<i class="fa-solid fa-location-dot text-amber-700"></i> <a href="${esc(safeUrl)}" target="_blank" rel="noopener" class="text-blue-700 underline font-semibold hover:text-blue-900">Google Maps</a>`);
+            return `<li><strong>Supplier Details:</strong>${sp.name ? ` <span class="font-semibold text-amber-950">${esc(sp.name)}</span>` : ''}` +
+                (bits.length ? `<br><span class="text-xs text-amber-900/80 ml-5 block mt-0.5">${bits.join(' &nbsp;|&nbsp; ')}</span>` : '') + `</li>`;
+        }
+
         onSnapshot(doc(db, 'settings', 'reminders'), (snap) => {
             const d = snap.exists() ? snap.data() : {};
             const items = Array.isArray(d.items) ? d.items.filter(Boolean) : [];
             receiptNoteText = d.receiptNote || '';
+            const supplier = d.supplier === undefined ? DEFAULT_SUPPLIER : d.supplier;
+            const supHtml = supplierHtml(supplier);
             const sec = document.getElementById('remindersSection');
-            if (!items.length && !d.badge && !d.note) { sec.classList.add('hidden'); return; }
+            if (!items.length && !d.badge && !d.note && !supHtml) { sec.classList.add('hidden'); return; }
             document.getElementById('remTitle').innerText = d.title || 'Important Reminders & Guidelines';
             document.getElementById('remBadgeText').innerText = d.badge || '';
             document.getElementById('remBadge').classList.toggle('hidden', !d.badge);
-            document.getElementById('remList').innerHTML = items.map(t => `<li>${richText(t)}</li>`).join('');
+            document.getElementById('remList').innerHTML = items.map(t => `<li>${richText(t)}</li>`).join('') + supHtml;
             const note = document.getElementById('remNote');
             note.innerText = d.note || ''; note.classList.toggle('hidden', !d.note);
             sec.classList.remove('hidden');

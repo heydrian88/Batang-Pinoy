@@ -198,6 +198,26 @@
                         <label class="text-xs font-bold text-slate-600">Reminders (one per line)</label>
                         <textarea id="rItems" rows="9" placeholder="One reminder per line.&#10;Use **double asterisks** for bold, e.g. **Payment Deadline:** your text.&#10;Web links become clickable automatically." class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
                     </div>
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3">
+                        <p class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-store"></i> Supplier Details (shown at the end of the reminders)</p>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600">Supplier name</label>
+                            <input id="rSupName" maxlength="80" placeholder="e.g. KALOSph Las Piñas" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600">Contact number</label>
+                            <input id="rSupContact" maxlength="60" placeholder="e.g. 09XX XXX XXXX" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600">Address</label>
+                            <textarea id="rSupAddress" rows="2" maxlength="200" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600">Google Maps link</label>
+                            <input id="rSupMap" type="url" maxlength="300" placeholder="https://maps.google.com/..." class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                            <p class="text-[11px] text-slate-500 mt-1">Leave all supplier fields empty to hide the supplier details.</p>
+                        </div>
+                    </div>
                     <div>
                         <label class="text-xs font-bold text-slate-600">Closing message (optional)</label>
                         <input id="rNote" maxlength="160" placeholder="e.g. Thank you for your support!" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
@@ -372,11 +392,17 @@
             }));
             unsubscribers.push(onSnapshot(doc(db, 'settings', 'reminders'), (snap) => {
                 const d = snap.exists() ? snap.data() : {};
-                const busy = ['rTitle', 'rBadge', 'rItems', 'rNote', 'rReceipt'].some(id => document.activeElement === $(id));
+                const busy = ['rTitle', 'rBadge', 'rItems', 'rNote', 'rReceipt', 'rSupName', 'rSupContact', 'rSupAddress', 'rSupMap'].some(id => document.activeElement === $(id));
                 if (busy) return;
                 $('rTitle').value = d.title || ''; $('rBadge').value = d.badge || '';
                 $('rItems').value = Array.isArray(d.items) ? d.items.join('\n') : '';
                 $('rNote').value = d.note || ''; $('rReceipt').value = d.receiptNote || '';
+                // Until a supplier is saved, show the original one so it can be edited instead of retyped
+                const sp = d.supplier === undefined
+                    ? { name: 'KALOSph Las Piñas', contact: '09620485439', address: '#17 Las Piñas Commercial Complex, Talon Uno Las Piñas City', mapUrl: 'https://maps.google.com/?q=KALOSph+Las+Piñas' }
+                    : (d.supplier || {});
+                $('rSupName').value = sp.name || ''; $('rSupContact').value = sp.contact || '';
+                $('rSupAddress').value = sp.address || ''; $('rSupMap').value = sp.mapUrl || '';
             }, (e) => console.error(e)));
             unsubscribers.push(onSnapshot(doc(db, 'settings', 'countdown'), (snap) => {
                 countdownCfg = snap.exists() ? snap.data() : {};
@@ -706,8 +732,15 @@
                     badge: $('rBadge').value.trim(),
                     items: $('rItems').value.split('\n').map(t => t.trim()).filter(Boolean),
                     note: $('rNote').value.trim(),
-                    receiptNote: $('rReceipt').value.trim()
+                    receiptNote: $('rReceipt').value.trim(),
+                    supplier: {
+                        name: $('rSupName').value.trim(),
+                        contact: $('rSupContact').value.trim(),
+                        address: $('rSupAddress').value.trim(),
+                        mapUrl: $('rSupMap').value.trim()
+                    }
                 };
+                if (data.supplier.mapUrl && !/^https?:\/\//i.test(data.supplier.mapUrl)) { toast('Check the map link', 'It must start with http:// or https://'); return; }
                 await setDoc(doc(db, 'settings', 'reminders'), data);
                 toast('Saved', 'Reminders are updated on the main page.');
             } catch (err) {
