@@ -130,11 +130,12 @@
                     <table class="w-full text-left text-xs">
                         <thead>
                             <tr class="bg-slate-100 text-slate-700 uppercase tracking-wider font-bold">
-                                <th class="p-3">Name / Date</th><th class="p-3">Jacket</th><th class="p-3">T-Shirt</th><th class="p-3">Qty</th>
-                                <th class="p-3">Fulfillment</th><th class="p-3">Total</th><th class="p-3">Proof of Payment</th><th class="p-3">Payment</th><th class="p-3 text-center">Action</th>
+                                <th class="p-3">Order No.</th><th class="p-3">Name / Date</th><th class="p-3">Jacket</th><th class="p-3">T-Shirt</th>
+                                <th class="p-3">Fulfillment</th><th class="p-3">Total</th><th class="p-3">Proof of Payment</th><th class="p-3 text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody id="ordersBody" class="divide-y divide-slate-200"></tbody>
+                        <tfoot id="ordersFoot" class="bg-slate-900 text-white"></tfoot>
                     </table>
                 </div>
             </div>
@@ -260,10 +261,6 @@
                     <div>
                         <label class="text-xs font-bold text-slate-600">Fulfillment</label>
                         <select id="eFulfillment" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"><option>Delivery</option><option>Store Pickup</option></select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-600">Payment Status</label>
-                        <select id="ePayment" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"><option>Pending</option><option>Paid</option></select>
                     </div>
                 </div>
                 <div class="flex gap-2 pt-1">
@@ -567,40 +564,51 @@
             $('orderCount').innerText = orders.length;
             $('noOrders').classList.toggle('hidden', orders.length > 0);
             $('ordersWrap').classList.toggle('hidden', orders.length === 0);
+            // Helpers: what was ordered, and how many
+            const ordered = (v) => !!v && v !== 'No';
+            const sizeLabel = (v) => { const m = /\((.+)\)/.exec(v || ''); return m ? m[1] : v; };
+            const jQtyOf = (o) => ordered(o.jacket) ? (o.jacketQty || 1) : 0;
+            const tQtyOf = (o) => ordered(o.tshirt) ? (o.tshirtQty || 1) : 0;
+            // Payment is automatic once proof is uploaded
+            const isPaid = (o) => o.paymentStatus === 'Paid' || !!o.proof;
+            const itemCell = (has, size, qty, back) => has
+                ? `<span class="font-bold text-slate-800">${esc(size)}</span> <span class="text-slate-500">× ${qty}</span>` +
+                  (back ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(back)}</span>` : '')
+                : '<span class="text-slate-300">—</span>';
+
             $('ordersBody').innerHTML = orders.map(o => `
                 <tr class="hover:bg-slate-50">
-                    <td class="p-3 font-semibold text-slate-800">${esc(o.fullName)}<span class="block text-[10px] text-slate-400 font-normal">${esc(o.date)} · ${esc(o.id)}</span></td>
-                    <td class="p-3">${esc(o.jacket)}${o.jacketBackPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.jacketBackPrint)}</span>` : ''}</td>
-                    <td class="p-3">${esc(o.tshirt)}${o.backPrint ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(o.backPrint)}</span>` : ''}</td>
-                    <td class="p-3 whitespace-nowrap">${(() => {
-                        const hasJ = o.jacket && o.jacket !== 'No', hasT = o.tshirt && o.tshirt !== 'No';
-                        const jq = hasJ ? (o.jacketQty || 1) : 0, tq = hasT ? (o.tshirtQty || 1) : 0;
-                        return (hasJ ? `<span class="block">Jacket: <b>${jq}</b></span>` : '') +
-                               (hasT ? `<span class="block">T-Shirt: <b>${tq}</b></span>` : '') +
-                               `<span class="block text-[10px] text-slate-400 font-semibold mt-0.5">${jq + tq} pc${jq + tq === 1 ? '' : 's'} total</span>`;
-                    })()}</td>
+                    <td class="p-3 font-bold text-taekwondo-blue whitespace-nowrap">${esc(o.id)}</td>
+                    <td class="p-3 font-semibold text-slate-800">${esc(o.fullName)}<span class="block text-[10px] text-slate-400 font-normal">${esc(o.date)}</span></td>
+                    <td class="p-3 whitespace-nowrap">${itemCell(ordered(o.jacket), sizeLabel(o.jacket), jQtyOf(o), o.jacketBackPrint)}</td>
+                    <td class="p-3 whitespace-nowrap">${itemCell(ordered(o.tshirt), sizeLabel(o.tshirt), tQtyOf(o), o.backPrint)}</td>
                     <td class="p-3">${esc(o.fulfillment)}<span class="block text-[10px] text-slate-400">${esc(o.deliveryNote)}</span></td>
                     <td class="p-3 font-bold">₱${Number(o.total || 0).toLocaleString()}</td>
                     <td class="p-3">${o.proof
                         ? `<img src="${o.proof}" onclick="openProof('${o.docId}')" title="Click to enlarge" class="w-14 h-14 object-cover rounded-lg border border-slate-300 cursor-zoom-in hover:opacity-80">`
                         : '<span class="text-[10px] text-slate-400">No proof</span>'}</td>
-                    <td class="p-3">
-                        <select onchange="setPayment('${o.docId}', this.value)" class="border rounded-md px-2 py-1 text-xs font-bold ${o.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200'}">
-                            <option ${o.paymentStatus === 'Paid' ? 'selected' : ''}>Paid</option>
-                            <option ${o.paymentStatus !== 'Paid' ? 'selected' : ''}>Pending</option>
-                        </select>
-                    </td>
                     <td class="p-3 text-center whitespace-nowrap">
                         <button onclick="openEditOrder('${o.docId}')" class="text-taekwondo-blue hover:text-blue-800 mr-3 font-bold" title="Edit"><i class="fa-solid fa-pen"></i> Edit</button>
                         <button onclick="deleteOrder('${o.docId}')" class="text-slate-400 hover:text-red-600" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
                     </td>
                 </tr>`).join('');
+
+            // Totals at the bottom of the list
+            const totalJ = orders.reduce((n, o) => n + jQtyOf(o), 0);
+            const totalT = orders.reduce((n, o) => n + tQtyOf(o), 0);
+            const totalPaid = orders.filter(isPaid).reduce((n, o) => n + Number(o.total || 0), 0);
+            const lbl = 'block text-[10px] uppercase tracking-widest text-slate-400 font-bold';
+            $('ordersFoot').innerHTML = `
+                <tr>
+                    <td colspan="2" class="p-3 text-xs font-extrabold uppercase tracking-wider">Totals <span class="font-normal text-slate-400 normal-case">(${orders.length} order${orders.length === 1 ? '' : 's'})</span></td>
+                    <td class="p-3"><span class="${lbl}">Total Jackets</span><span class="text-lg font-black">${totalJ}</span></td>
+                    <td class="p-3"><span class="${lbl}">Total T-Shirts</span><span class="text-lg font-black">${totalT}</span></td>
+                    <td class="p-3"></td>
+                    <td class="p-3 whitespace-nowrap"><span class="${lbl}">Total Paid</span><span class="text-lg font-black text-emerald-400">₱${totalPaid.toLocaleString()}</span></td>
+                    <td colspan="2" class="p-3"></td>
+                </tr>`;
         }
 
-        async function setPayment(id, status) {
-            try { await updateDoc(doc(db, 'registrations', id), { paymentStatus: status }); }
-            catch (err) { console.error(err); toast('Update failed', errMsg(err, 'Check your login and rules.')); }
-        }
         async function deleteOrder(id) {
             if (!confirm('Delete this registration entry?')) return;
             try { await deleteDoc(doc(db, 'registrations', id)); }
@@ -651,7 +659,6 @@
             $('eJacketBack').value = r.jacketBackPrint || '';
             $('eTshirtBack').value = r.backPrint || '';
             $('eFulfillment').value = r.fulfillment === 'Store Pickup' ? 'Store Pickup' : 'Delivery';
-            $('ePayment').value = r.paymentStatus === 'Paid' ? 'Paid' : 'Pending';
             $('editOrderModal').classList.remove('hidden'); $('editOrderModal').classList.add('flex');
         }
         function closeEditOrder() {
@@ -678,7 +685,6 @@
                 backPrint: buyT ? $('eTshirtBack').value.trim().toUpperCase() : '',
                 fulfillment,
                 deliveryNote: fulfillment === 'Delivery' ? 'Delivery (Contact 09620485439)' : 'Store Pickup (KALOSph)',
-                paymentStatus: $('ePayment').value,
                 total: PRICE_JACKET * jQ + PRICE_TSHIRT * tQ
             };
             const btn = $('eSaveBtn'); btn.disabled = true; btn.innerText = 'Saving...';
@@ -784,7 +790,7 @@
         }
         function closeProof() { $('proofModal').classList.add('hidden'); $('proofModal').classList.remove('flex'); }
 
-        Object.assign(window, { logout, showTab, resetForm, editProduct, deleteProduct, setPayment, deleteOrder, clearAllOrders, exportToCSV, openEditOrder, closeEditOrder, openProof, closeProof });
+        Object.assign(window, { logout, showTab, resetForm, editProduct, deleteProduct, deleteOrder, clearAllOrders, exportToCSV, openEditOrder, closeEditOrder, openProof, closeProof });
     </script>
 </body>
 </html>
