@@ -65,6 +65,7 @@
                 <button id="tabPayment" onclick="showTab('payment')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-wallet"></i> GCash Payment</button>
                 <button id="tabCountdown" onclick="showTab('countdown')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-hourglass-half"></i> Countdown</button>
                 <button id="tabReminders" onclick="showTab('reminders')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-circle-exclamation"></i> Reminders</button>
+                <button id="tabTrash" onclick="showTab('trash')" class="px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-trash-can-arrow-up"></i> Trash (<span id="trashCount">0</span>)</button>
             </div>
 
             <!-- ===== Products tab ===== -->
@@ -225,6 +226,30 @@
                     </div>
                     <button id="rSaveBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm">Save Reminders</button>
                 </form>
+            </div>
+            <!-- ===== Trash tab ===== -->
+            <div id="trashTab" class="hidden bg-white rounded-2xl shadow overflow-hidden">
+                <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200">
+                    <div>
+                        <h2 class="font-extrabold text-slate-900">Trash</h2>
+                        <p class="text-xs text-slate-500">Deleted and reset registrations are kept here. Restore them anytime.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="restoreAll()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg"><i class="fa-solid fa-rotate-left"></i> Restore All</button>
+                        <button onclick="emptyTrash()" class="text-red-600 hover:text-red-800 text-xs font-semibold px-2"><i class="fa-solid fa-fire"></i> Empty Trash</button>
+                    </div>
+                </div>
+                <div id="noTrash" class="text-center py-12 text-sm text-slate-500">The trash is empty.</div>
+                <div id="trashWrap" class="hidden overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 uppercase tracking-wider font-bold">
+                                <th class="p-3">Name / Code</th><th class="p-3">Items</th><th class="p-3">Total</th><th class="p-3">Deleted On</th><th class="p-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trashBody" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
@@ -424,6 +449,8 @@
             $('paymentTab').classList.toggle('hidden', name !== 'payment');
             $('countdownTab').classList.toggle('hidden', name !== 'countdown');
             $('remindersTab').classList.toggle('hidden', name !== 'reminders');
+            $('trashTab').classList.toggle('hidden', name !== 'trash');
+            $('tabTrash').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'trash' ? on : off);
             $('tabReminders').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'reminders' ? on : off);
             $('tabCountdown').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'countdown' ? on : off);
             $('tabPayment').className = 'px-4 py-2 rounded-lg text-sm font-bold ' + (name === 'payment' ? on : off);
@@ -561,9 +588,11 @@
 
         // ---------------- Orders ----------------
         function renderOrders() {
-            $('orderCount').innerText = orders.length;
-            $('noOrders').classList.toggle('hidden', orders.length > 0);
-            $('ordersWrap').classList.toggle('hidden', orders.length === 0);
+            const list = orders.filter(o => !o.deleted);
+            renderTrash();
+            $('orderCount').innerText = list.length;
+            $('noOrders').classList.toggle('hidden', list.length > 0);
+            $('ordersWrap').classList.toggle('hidden', list.length === 0);
             // Helpers: date/time, what was ordered, and how many
             const fmtDT = (ts) => {
                 const d = ts && typeof ts.toDate === 'function' ? ts.toDate() : null;
@@ -580,7 +609,7 @@
                   (back ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(back)}</span>` : '')
                 : '<span class="text-slate-300">—</span>';
 
-            $('ordersBody').innerHTML = orders.map((o, i) => `
+            $('ordersBody').innerHTML = list.map((o, i) => `
                 <tr class="hover:bg-slate-50">
                     <td class="p-3 font-black text-taekwondo-blue text-sm whitespace-nowrap">${i + 1}</td>
                     <td class="p-3 font-semibold text-slate-800">${esc(o.fullName)}
@@ -601,13 +630,13 @@
                 </tr>`).join('');
 
             // Totals at the bottom of the list
-            const totalJ = orders.reduce((n, o) => n + jQtyOf(o), 0);
-            const totalT = orders.reduce((n, o) => n + tQtyOf(o), 0);
-            const totalPaid = orders.filter(isPaid).reduce((n, o) => n + Number(o.total || 0), 0);
+            const totalJ = list.reduce((n, o) => n + jQtyOf(o), 0);
+            const totalT = list.reduce((n, o) => n + tQtyOf(o), 0);
+            const totalPaid = list.filter(isPaid).reduce((n, o) => n + Number(o.total || 0), 0);
             const lbl = 'block text-[10px] uppercase tracking-widest text-slate-400 font-bold';
             $('ordersFoot').innerHTML = `
                 <tr>
-                    <td colspan="2" class="p-3 text-xs font-extrabold uppercase tracking-wider">Totals <span class="font-normal text-slate-400 normal-case">(${orders.length} order${orders.length === 1 ? '' : 's'})</span></td>
+                    <td colspan="2" class="p-3 text-xs font-extrabold uppercase tracking-wider">Totals <span class="font-normal text-slate-400 normal-case">(${list.length} order${list.length === 1 ? '' : 's'})</span></td>
                     <td class="p-3"><span class="${lbl}">Total Jackets</span><span class="text-lg font-black">${totalJ}</span></td>
                     <td class="p-3"><span class="${lbl}">Total T-Shirts</span><span class="text-lg font-black">${totalT}</span></td>
                     <td class="p-3"></td>
@@ -616,26 +645,86 @@
                 </tr>`;
         }
 
+        // Delete and Reset All move registrations to the Trash instead of erasing them
         async function deleteOrder(id) {
-            if (!confirm('Delete this registration entry?')) return;
+            if (!confirm('Move this registration to the Trash? You can restore it later.')) return;
+            try { await updateDoc(doc(db, 'registrations', id), { deleted: true, deletedAt: serverTimestamp() }); toast('Moved to Trash', 'You can restore it from the Trash tab.'); }
+            catch (err) { console.error(err); toast('Delete failed', errMsg(err, 'Check your login and rules.')); }
+        }
+        // Run a batch of updates/deletes in chunks (Firestore allows 500 writes per batch)
+        async function runBatched(docs, apply) {
+            for (let i = 0; i < docs.length; i += 400) {
+                const batch = writeBatch(db);
+                docs.slice(i, i + 400).forEach(o => apply(batch, doc(db, 'registrations', o.docId)));
+                await batch.commit();
+            }
+        }
+        async function clearAllOrders() {
+            const active = orders.filter(o => !o.deleted);
+            if (!active.length) { alert('There are no registrations to reset.'); return; }
+            if (!confirm(`Reset ALL ${active.length} registration(s)? They will be moved to the Trash and can be restored.`)) return;
+            try {
+                await runBatched(active, (b, ref) => b.update(ref, { deleted: true, deletedAt: serverTimestamp() }));
+                toast('Reset done', 'All registrations were moved to the Trash. You can restore them there.');
+            } catch (err) { console.error(err); toast('Reset failed', errMsg(err, 'Check your login and rules.')); }
+        }
+
+        // ---------------- Trash ----------------
+        function renderTrash() {
+            const trash = orders.filter(o => o.deleted).sort((p, q) => (q.deletedAt?.seconds || 0) - (p.deletedAt?.seconds || 0));
+            $('trashCount').innerText = trash.length;
+            $('noTrash').classList.toggle('hidden', trash.length > 0);
+            $('trashWrap').classList.toggle('hidden', trash.length === 0);
+            const ordered = (v) => !!v && v !== 'No';
+            const sz = (v) => { const m = /\((.+)\)/.exec(v || ''); return m ? m[1] : v; };
+            const when = (ts) => ts && typeof ts.toDate === 'function'
+                ? ts.toDate().toLocaleString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+            $('trashBody').innerHTML = trash.map(o => {
+                const items = [ordered(o.jacket) ? `Jacket ${sz(o.jacket)} × ${o.jacketQty || 1}` : '', ordered(o.tshirt) ? `T-Shirt ${sz(o.tshirt)} × ${o.tshirtQty || 1}` : ''].filter(Boolean).join(', ');
+                return `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-semibold text-slate-800">${esc(o.fullName)}<span class="block text-[10px] text-slate-400 font-normal">${esc(o.id)}</span></td>
+                    <td class="p-3">${esc(items)}</td>
+                    <td class="p-3 font-bold">₱${Number(o.total || 0).toLocaleString()}</td>
+                    <td class="p-3 text-slate-500">${esc(when(o.deletedAt))}</td>
+                    <td class="p-3 text-center whitespace-nowrap">
+                        <button onclick="restoreOrder('${o.docId}')" class="text-emerald-700 hover:text-emerald-900 mr-3 font-bold"><i class="fa-solid fa-rotate-left"></i> Restore</button>
+                        <button onclick="purgeOrder('${o.docId}')" class="text-slate-400 hover:text-red-600" title="Delete permanently"><i class="fa-solid fa-xmark"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+        async function restoreOrder(id) {
+            try { await updateDoc(doc(db, 'registrations', id), { deleted: false, deletedAt: null }); toast('Restored', 'The registration is back in Orders.'); }
+            catch (err) { console.error(err); toast('Restore failed', errMsg(err, 'Check your login and rules.')); }
+        }
+        async function restoreAll() {
+            const trash = orders.filter(o => o.deleted);
+            if (!trash.length) return;
+            try {
+                await runBatched(trash, (b, ref) => b.update(ref, { deleted: false, deletedAt: null }));
+                toast('Restored', `${trash.length} registration(s) are back in Orders.`);
+            } catch (err) { console.error(err); toast('Restore failed', errMsg(err, 'Check your login and rules.')); }
+        }
+        async function purgeOrder(id) {
+            if (!confirm('Permanently delete this registration? This cannot be undone.')) return;
             try { await deleteDoc(doc(db, 'registrations', id)); }
             catch (err) { console.error(err); toast('Delete failed', errMsg(err, 'Check your login and rules.')); }
         }
-        async function clearAllOrders() {
-            if (!confirm('Clear ALL registrations? This cannot be undone.')) return;
-            try {
-                const snap = await getDocs(ordersRef);
-                const batch = writeBatch(db);
-                snap.forEach(d => batch.delete(d.ref));
-                await batch.commit();
-            } catch (err) { console.error(err); toast('Clear failed', errMsg(err, 'Check your login and rules.')); }
+        async function emptyTrash() {
+            const trash = orders.filter(o => o.deleted);
+            if (!trash.length) return;
+            if (!confirm(`Permanently delete ${trash.length} registration(s) in the Trash? This CANNOT be undone.`)) return;
+            try { await runBatched(trash, (b, ref) => b.delete(ref)); toast('Trash emptied', 'Those registrations were permanently deleted.'); }
+            catch (err) { console.error(err); toast('Delete failed', errMsg(err, 'Check your login and rules.')); }
         }
 
         function exportToCSV() {
-            if (!orders.length) { alert('No data available to export.'); return; }
+            const active = orders.filter(o => !o.deleted);
+            if (!active.length) { alert('No data available to export.'); return; }
             const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
             let csv = 'ID,Date,Full Name,Jacket,Jacket Back Print Name,T-Shirt,T-Shirt Back Print Name,Fulfillment Method,Details,Payment Status,Proof Uploaded,Total Amount (PHP),Jacket Qty,T-Shirt Qty,Customer Confirmed Payment\r\n';
-            orders.forEach(o => { csv += [o.id, o.date, q(o.fullName), q(o.jacket), q(o.jacketBackPrint), q(o.tshirt), q(o.backPrint), q(o.fulfillment), q(o.deliveryNote), o.paymentStatus, o.proof ? 'Yes' : 'No', o.total, o.jacketQty || (o.jacket && o.jacket !== 'No' ? 1 : 0), o.tshirtQty || (o.tshirt && o.tshirt !== 'No' ? 1 : 0), o.customerPaymentConfirmed ? 'Yes' : 'No'].join(',') + '\r\n'; });
+            active.forEach(o => { csv += [o.id, o.date, q(o.fullName), q(o.jacket), q(o.jacketBackPrint), q(o.tshirt), q(o.backPrint), q(o.fulfillment), q(o.deliveryNote), o.paymentStatus, o.proof ? 'Yes' : 'No', o.total, o.jacketQty || (o.jacket && o.jacket !== 'No' ? 1 : 0), o.tshirtQty || (o.tshirt && o.tshirt !== 'No' ? 1 : 0), o.customerPaymentConfirmed ? 'Yes' : 'No'].join(',') + '\r\n'; });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
             a.download = 'Batang_Pinoy_Taekwondo_Registrations.csv';
@@ -797,7 +886,7 @@
         }
         function closeProof() { $('proofModal').classList.add('hidden'); $('proofModal').classList.remove('flex'); }
 
-        Object.assign(window, { logout, showTab, resetForm, editProduct, deleteProduct, deleteOrder, clearAllOrders, exportToCSV, openEditOrder, closeEditOrder, openProof, closeProof });
+        Object.assign(window, { logout, showTab, resetForm, editProduct, deleteProduct, deleteOrder, clearAllOrders, restoreOrder, restoreAll, purgeOrder, emptyTrash, exportToCSV, openEditOrder, closeEditOrder, openProof, closeProof });
     </script>
 </body>
 </html>
