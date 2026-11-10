@@ -373,6 +373,22 @@
         </div>
     </div>
 
+    <!-- Duplicate Name Modal -->
+    <div id="dupModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 text-center">
+                <div class="mx-auto w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <h3 class="text-lg font-extrabold text-slate-900">You already have a previous order</h3>
+                <p class="text-sm text-slate-600 mt-2"><span id="dupName" class="font-bold text-slate-900"></span> already has <span id="dupCount" class="font-bold"></span> in our records.</p>
+                <p class="text-xs text-slate-500 mt-2">If this is a mistake or a double submission, tap <b>Go back</b>. If you really want to order again (for example, a different size or another item), tap <b>Proceed with additional order</b>.</p>
+            </div>
+            <div class="px-6 pb-6 flex flex-col sm:flex-row gap-2">
+                <button type="button" onclick="resolveDup(false)" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-100">Go back</button>
+                <button type="button" onclick="resolveDup(true)" class="flex-1 px-4 py-2.5 rounded-xl bg-taekwondo-blue text-white font-bold text-sm hover:bg-blue-800">Proceed with additional order</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Image Lightbox -->
     <div id="lightbox" onclick="closeLightbox()" class="fixed inset-0 bg-black/80 z-[60] hidden items-center justify-center p-4 cursor-zoom-out">
         <img id="lightboxImg" src="" alt="" class="max-h-[90vh] max-w-full rounded-xl shadow-2xl">
@@ -443,7 +459,7 @@
     <!-- JavaScript Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, query, orderBy, serverTimestamp }
+        import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc, setDoc, increment, query, orderBy, serverTimestamp }
             from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -647,6 +663,20 @@
                 showToast('Proof of Payment Required', 'Please upload your GCash payment screenshot first.', 'error');
                 return;
             }
+            // Duplicate name check: warn if this name already has an order
+            const key = nameKey(fullName);
+            if (key) {
+                let existing = 0;
+                try {
+                    const snap = await getDoc(doc(db, 'orderNames', key));
+                    if (snap.exists()) existing = snap.data().count || 1;
+                } catch (err) { console.warn('Duplicate check unavailable:', err); }
+                if (existing > 0) {
+                    const proceed = await confirmDuplicate(fullName, existing);
+                    if (!proceed) return;
+                    record.additionalOrder = true;
+                }
+            }
             const submitBtn = document.querySelector('#gearForm button[type="submit"]');
             const submitLabel = submitBtn.innerHTML;
             submitBtn.disabled = true; submitBtn.innerText = 'Submitting...';
@@ -655,6 +685,8 @@
             try {
                 const proof = await compressProof(proofInput.files[0]);
                 await addDoc(registrationsRef, { ...record, proof, createdAt: serverTimestamp(), paidAt: serverTimestamp() });
+                try { if (key) await setDoc(doc(db, 'orderNames', key), { name: fullName, count: increment(1), lastAt: serverTimestamp() }, { merge: true }); }
+                catch (err) { console.warn('Name index not updated:', err); }
             } catch (err) {
                 console.error(err);
                 showToast('Save Failed', err.message === 'too-large' ? 'Your screenshot is too large. Please use a smaller image.' : 'Could not save your order. Please try again.', 'error');
@@ -836,6 +868,28 @@
             });
         }
 
+        // ---------- Duplicate name check ----------
+        // Names are stored as a normalized key (lowercase, no accents/punctuation, words sorted)
+        // so "JUAN  dela Cruz", "Dela Cruz, Juan" and "juan dela cruz" are treated as the same person.
+        function nameKey(name) {
+            const words = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean).sort();
+            return words.join('_');
+        }
+        let dupResolve = null;
+        function confirmDuplicate(name, count) {
+            return new Promise(resolve => {
+                dupResolve = resolve;
+                document.getElementById('dupName').innerText = name;
+                document.getElementById('dupCount').innerText = count > 1 ? count + ' orders' : 'a previous order';
+                const m = document.getElementById('dupModal'); m.classList.remove('hidden'); m.classList.add('flex');
+            });
+        }
+        function resolveDup(proceed) {
+            const m = document.getElementById('dupModal'); m.classList.add('hidden'); m.classList.remove('flex');
+            if (dupResolve) { dupResolve(proceed); dupResolve = null; }
+        }
+
         // ---------- Size charts ----------
         // Fill in the real measurements below. Nothing is shown until rows are provided.
         const SIZE_CHARTS = {
@@ -1012,7 +1066,7 @@
 
         Object.assign(window, {
             scrollToForm, toggleJacketOptions, toggleTshirtOptions, toggleFulfillment,
-            handleFormSubmit, toggleProofGate, updateCalculation, openSizeChart, closeSizeChart, zoomSizeChart, previewProof, closeReceipt, copyGcash, swapImage, openLightbox, closeLightbox
+            handleFormSubmit, resolveDup, toggleProofGate, updateCalculation, openSizeChart, closeSizeChart, zoomSizeChart, previewProof, closeReceipt, copyGcash, swapImage, openLightbox, closeLightbox
         });
     </script>
 </body>

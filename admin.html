@@ -438,7 +438,36 @@
             unsubscribers.push(onSnapshot(query(ordersRef, orderBy('createdAt', 'asc')), (snap) => {
                 orders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
                 renderOrders();
+                syncNameIndex();
             }, (e) => { console.error(e); toast('Error', 'Cannot load orders. Check Firestore rules.'); }));
+        }
+
+        // Keeps the public "orderNames" index (used for the duplicate-name warning on the order form)
+        // in line with the active orders. Deleted/trashed orders are not counted.
+        function nameKey(name) {
+            const words = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean).sort();
+            return words.join('_');
+        }
+        let syncingNames = false;
+        async function syncNameIndex() {
+            if (syncingNames) return; syncingNames = true;
+            try {
+                const want = {};
+                orders.filter(o => !o.deleted).forEach(o => {
+                    const k = nameKey(o.fullName); if (!k) return;
+                    (want[k] = want[k] || { name: o.fullName, count: 0 }).count++;
+                });
+                const have = {};
+                (await getDocs(collection(db, 'orderNames'))).forEach(d => { have[d.id] = d.data(); });
+                const batch = writeBatch(db); let n = 0;
+                Object.keys(want).forEach(k => {
+                    if (!have[k] || have[k].count !== want[k].count) { batch.set(doc(db, 'orderNames', k), { name: want[k].name, count: want[k].count, lastAt: serverTimestamp() }); n++; }
+                });
+                Object.keys(have).forEach(k => { if (!want[k]) { batch.delete(doc(db, 'orderNames', k)); n++; } });
+                if (n) await batch.commit();
+            } catch (e) { console.warn('Name index sync failed:', e); }
+            syncingNames = false;
         }
 
         // ---------------- Tabs ----------------
