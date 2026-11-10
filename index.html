@@ -302,7 +302,7 @@
                 <div id="gcashSection" class="bg-white rounded-2xl border-2 border-blue-200 overflow-hidden">
                     <div class="bg-blue-600 text-white px-6 py-4">
                         <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-wallet"></i> Step 1: Pay via GCash</h3>
-                        <p class="text-xs text-blue-100">Scan the QR code or send your payment to the account below.</p>
+                        <p id="gcashSub" class="text-xs text-blue-100">Scan the QR code or send your payment to the account below.</p>
                     </div>
                     <div id="gcashBody" class="p-6 flex flex-col sm:flex-row items-center gap-6">
                         <div id="gcashQrBox" class="w-48 h-48 shrink-0 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-center text-xs text-slate-400 overflow-hidden">
@@ -978,20 +978,42 @@
                 (bits.length ? `<br><span class="text-xs text-amber-900/80 ml-5 block mt-0.5">${bits.join(' &nbsp;|&nbsp; ')}</span>` : '') + `</li>`;
         }
 
+        // Original reminder content. It is used until the admin saves their own version;
+        // the only thing that is empty by default is the payment deadline.
+        const DEFAULT_ITEMS = [
+            '**Production Lead Time:** Approximately 12–15 days (excluding Sundays and holidays).',
+            '**At-Cost Pricing:** No markup has been added to the prices. This is strictly to help our team look more presentable, uniform, and professional.',
+            '**Fulfillment & Delivery:** Delivery fee is shouldered individually by each person, OR you may opt for direct store pickup.'
+        ];
+        const DEFAULT_NOTE = 'Thank you for your support and cooperation!';
+        const DEFAULT_RECEIPT = 'Production takes about 12–15 days (excluding Sundays and holidays). Supplier: KALOSph Las Piñas, **09620485439**.';
+
         onSnapshot(doc(db, 'settings', 'reminders'), (snap) => {
             const d = snap.exists() ? snap.data() : {};
-            const items = Array.isArray(d.items) ? d.items.filter(Boolean) : [];
-            receiptNoteText = d.receiptNote || '';
+            const deadline = String(d.deadlineText || '').trim().replace(/\.+$/, '');
+            const items = Array.isArray(d.items) ? d.items.filter(Boolean) : DEFAULT_ITEMS;
+            const note = d.note === undefined ? DEFAULT_NOTE : d.note;
+            const receipt = d.receiptNote === undefined ? DEFAULT_RECEIPT : d.receiptNote;
             const supplier = d.supplier === undefined ? DEFAULT_SUPPLIER : d.supplier;
             const supHtml = supplierHtml(supplier);
+
+            // Receipt note (deadline first, if one is set)
+            receiptNoteText = (deadline || receipt)
+                ? '**Reminder:** ' + (deadline ? `Payment deadline is **${deadline}**. ` : '') + receipt : '';
+
+            // GCash box subtitle
+            document.getElementById('gcashSub').innerText = 'Scan the QR code or send your payment to the account below.' + (deadline ? ` Deadline: ${deadline}.` : '');
+
             const sec = document.getElementById('remindersSection');
-            if (!items.length && !d.badge && !d.note && !supHtml) { sec.classList.add('hidden'); return; }
+            if (!items.length && !deadline && !note && !supHtml) { sec.classList.add('hidden'); return; }
             document.getElementById('remTitle').innerText = d.title || 'Important Reminders & Guidelines';
-            document.getElementById('remBadgeText').innerText = d.badge || '';
-            document.getElementById('remBadge').classList.toggle('hidden', !d.badge);
-            document.getElementById('remList').innerHTML = items.map(t => `<li>${richText(t)}</li>`).join('') + supHtml;
-            const note = document.getElementById('remNote');
-            note.innerText = d.note || ''; note.classList.toggle('hidden', !d.note);
+            document.getElementById('remBadgeText').innerText = deadline ? 'Deadline: ' + deadline : '';
+            document.getElementById('remBadge').classList.toggle('hidden', !deadline);
+            const deadlineLi = deadline
+                ? `<li><strong>Payment Deadline:</strong> ${esc(deadline)}. Please settle payments on or before this date.</li>` : '';
+            document.getElementById('remList').innerHTML = deadlineLi + items.map(t => `<li>${richText(t)}</li>`).join('') + supHtml;
+            const noteEl = document.getElementById('remNote');
+            noteEl.innerText = note || ''; noteEl.classList.toggle('hidden', !note);
             sec.classList.remove('hidden');
         }, (err) => console.error('Reminders error:', err));
 

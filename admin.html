@@ -184,15 +184,16 @@
             <!-- ===== Reminders tab ===== -->
             <div id="remindersTab" class="hidden max-w-2xl bg-white rounded-2xl shadow p-6">
                 <h2 class="font-extrabold text-slate-900 mb-1">Important Reminders & Guidelines</h2>
-                <p class="text-xs text-slate-500 mb-4">This is the yellow box on the main page. If you leave the reminders and the deadline badge empty, the box is hidden.</p>
+                <p class="text-xs text-slate-500 mb-4">This is the yellow box on the main page. The original reminders are filled in below so you can edit them. Only the payment deadline starts empty.</p>
                 <form id="remindersForm" class="space-y-4">
                     <div>
                         <label class="text-xs font-bold text-slate-600">Heading</label>
                         <input id="rTitle" maxlength="80" placeholder="Important Reminders & Guidelines" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-slate-600">Deadline badge (red label, optional)</label>
-                        <input id="rBadge" maxlength="60" placeholder="e.g. Deadline: your date here" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                        <label class="text-xs font-bold text-slate-600">Payment deadline (leave empty if there is none)</label>
+                        <input id="rDeadline" maxlength="80" placeholder="e.g. November 11, 2026 (Wednesday)" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                        <p class="text-[11px] text-slate-500 mt-1">Shows as the red "Deadline" badge, as the first "Payment Deadline" reminder, in the GCash box, and on the order receipt.</p>
                     </div>
                     <div>
                         <label class="text-xs font-bold text-slate-600">Reminders (one per line)</label>
@@ -223,8 +224,8 @@
                         <input id="rNote" maxlength="160" placeholder="e.g. Thank you for your support!" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-slate-600">Note shown on the customer's order receipt (optional)</label>
-                        <textarea id="rReceipt" rows="3" maxlength="400" placeholder="Leave empty to show no note on the receipt." class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+                        <label class="text-xs font-bold text-slate-600">Note on the customer's order receipt (the payment deadline is added in front automatically)</label>
+                        <textarea id="rReceipt" rows="3" maxlength="400" placeholder="Leave empty to show only the deadline (or nothing)." class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
                     </div>
                     <button id="rSaveBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm">Save Reminders</button>
                 </form>
@@ -392,11 +393,20 @@
             }));
             unsubscribers.push(onSnapshot(doc(db, 'settings', 'reminders'), (snap) => {
                 const d = snap.exists() ? snap.data() : {};
-                const busy = ['rTitle', 'rBadge', 'rItems', 'rNote', 'rReceipt', 'rSupName', 'rSupContact', 'rSupAddress', 'rSupMap'].some(id => document.activeElement === $(id));
+                const busy = ['rTitle', 'rDeadline', 'rItems', 'rNote', 'rReceipt', 'rSupName', 'rSupContact', 'rSupAddress', 'rSupMap'].some(id => document.activeElement === $(id));
                 if (busy) return;
-                $('rTitle').value = d.title || ''; $('rBadge').value = d.badge || '';
-                $('rItems').value = Array.isArray(d.items) ? d.items.join('\n') : '';
-                $('rNote').value = d.note || ''; $('rReceipt').value = d.receiptNote || '';
+                // Until the admin saves their own, show the original content so it can be edited instead of retyped
+                const DEF_ITEMS = [
+                    '**Production Lead Time:** Approximately 12–15 days (excluding Sundays and holidays).',
+                    '**At-Cost Pricing:** No markup has been added to the prices. This is strictly to help our team look more presentable, uniform, and professional.',
+                    '**Fulfillment & Delivery:** Delivery fee is shouldered individually by each person, OR you may opt for direct store pickup.'
+                ];
+                $('rTitle').value = d.title || ''; $('rDeadline').value = d.deadlineText || '';
+                $('rItems').value = (Array.isArray(d.items) ? d.items : DEF_ITEMS).join('\n');
+                $('rNote').value = d.note === undefined ? 'Thank you for your support and cooperation!' : d.note;
+                $('rReceipt').value = d.receiptNote === undefined
+                    ? 'Production takes about 12–15 days (excluding Sundays and holidays). Supplier: KALOSph Las Piñas, **09620485439**.'
+                    : d.receiptNote;
                 // Until a supplier is saved, show the original one so it can be edited instead of retyped
                 const sp = d.supplier === undefined
                     ? { name: 'KALOSph Las Piñas', contact: '09620485439', address: '#17 Las Piñas Commercial Complex, Talon Uno Las Piñas City', mapUrl: 'https://maps.google.com/?q=KALOSph+Las+Piñas' }
@@ -729,7 +739,7 @@
             try {
                 const data = {
                     title: $('rTitle').value.trim(),
-                    badge: $('rBadge').value.trim(),
+                    deadlineText: $('rDeadline').value.trim(),
                     items: $('rItems').value.split('\n').map(t => t.trim()).filter(Boolean),
                     note: $('rNote').value.trim(),
                     receiptNote: $('rReceipt').value.trim(),
