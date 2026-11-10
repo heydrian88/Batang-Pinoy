@@ -302,12 +302,9 @@
                 <div id="gcashSection" class="bg-white rounded-2xl border-2 border-blue-200 overflow-hidden">
                     <div class="bg-blue-600 text-white px-6 py-4">
                         <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-wallet"></i> Step 1: Pay via GCash</h3>
-                        <p id="gcashSub" class="text-xs text-blue-100">Scan the QR code or send your payment to the account below.</p>
+                        <p id="gcashSub" class="text-xs text-blue-100">Send your payment to the GCash account below.</p>
                     </div>
-                    <div id="gcashBody" class="p-6 flex flex-col sm:flex-row items-center gap-6">
-                        <div id="gcashQrBox" class="w-48 h-48 shrink-0 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-center text-xs text-slate-400 overflow-hidden">
-                            QR code<br>coming soon
-                        </div>
+                    <div id="gcashBody" class="p-6">
                         <div class="flex-1 w-full space-y-4">
                             <div>
                                 <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block">Account Name</span>
@@ -332,7 +329,7 @@
                 <label class="flex items-start gap-3 border-2 border-slate-200 rounded-2xl p-4 cursor-pointer hover:border-taekwondo-blue transition bg-slate-50/50">
                     <input type="checkbox" id="paymentConfirm" required onchange="toggleProofGate()" class="w-5 h-5 mt-0.5 text-taekwondo-blue rounded border-slate-300 focus:ring-taekwondo-blue">
                     <span class="text-sm font-semibold text-slate-800">I have successfully completed my GCash payment. <span class="text-red-500">*</span>
-                        <span class="block text-xs font-normal text-slate-500 mt-0.5">Your payment is verified by the admin before your order is marked as Paid.</span>
+                        <span class="block text-xs font-normal text-slate-500 mt-0.5">Your order is marked Paid once you submit your proof of payment.</span>
                     </span>
                 </label>
 
@@ -620,7 +617,7 @@
             const backPrint = buyTshirt ? document.getElementById('backPrint').value.trim().toUpperCase() : '';
             const fulfillment = document.querySelector('input[name="fulfillment"]:checked').value;
             const deliveryNote = fulfillment === 'Delivery' ? 'Delivery (Contact 09620485439)' : 'Store Pickup (KALOSph)';
-            const paymentStatus = 'Pending'; // admin marks it Paid after confirming payment
+            const paymentStatus = 'Paid'; // proof of payment is required to submit, so the order is marked Paid automatically (admin can still change it)
 
             let total = 0;
             total = PRICE_JACKET * jQty + PRICE_TSHIRT * tQty;
@@ -635,7 +632,8 @@
                 backPrint,
                 jacketQty: jQty,
                 tshirtQty: tQty,
-                customerPaymentConfirmed: true,   // customer's claim only; admin still verifies and sets Paid
+                customerPaymentConfirmed: true,
+                paidVia: 'proof-upload',
                 proofSubmitted: true,
                 fulfillment,
                 deliveryNote,
@@ -802,24 +800,12 @@
             document.getElementById('gcashNumber').innerText = d.number || '—';
             gcashNumberValue = d.number || '';
             document.getElementById('gcashCopy').classList.toggle('hidden', !d.number);
-            const box = document.getElementById('gcashQrBox');
-            if (d.qr) {
-                box.className = 'w-48 h-48 shrink-0 rounded-xl border border-slate-200 bg-white overflow-hidden cursor-zoom-in';
-                box.innerHTML = `<img src="${d.qr}" alt="GCash QR code" class="w-full h-full object-contain" onclick="openQr()">`;
-                window.__gcashQr = d.qr;
-            }
         }, (err) => console.error('GCash settings error:', err));
 
         function copyGcash() {
             if (!gcashNumberValue) return;
             navigator.clipboard?.writeText(gcashNumberValue).then(() => showToast('Copied!', 'GCash number copied.'));
         }
-        function openQr() {
-            if (!window.__gcashQr) return;
-            document.getElementById('lightboxImg').src = window.__gcashQr;
-            const lb = document.getElementById('lightbox'); lb.classList.remove('hidden'); lb.classList.add('flex');
-        }
-
         // ---------- Proof of payment upload ----------
         function previewProof() {
             const f = document.getElementById('proofFile').files[0];
@@ -1002,7 +988,7 @@
                 ? '**Reminder:** ' + (deadline ? `Payment deadline is **${deadline}**. ` : '') + receipt : '';
 
             // GCash box subtitle
-            document.getElementById('gcashSub').innerText = 'Scan the QR code or send your payment to the account below.' + (deadline ? ` Deadline: ${deadline}.` : '');
+            document.getElementById('gcashSub').innerText = 'Send your payment to the GCash account below.' + (deadline ? ` Deadline: ${deadline}.` : '');
 
             const sec = document.getElementById('remindersSection');
             if (!items.length && !deadline && !note && !supHtml) { sec.classList.add('hidden'); return; }
@@ -1019,7 +1005,7 @@
 
         Object.assign(window, {
             scrollToForm, toggleJacketOptions, toggleTshirtOptions, toggleFulfillment,
-            handleFormSubmit, toggleProofGate, updateCalculation, openSizeChart, closeSizeChart, previewProof, closeReceipt, copyGcash, openQr, swapImage, openLightbox, closeLightbox
+            handleFormSubmit, toggleProofGate, updateCalculation, openSizeChart, closeSizeChart, previewProof, closeReceipt, copyGcash, swapImage, openLightbox, closeLightbox
         });
     </script>
 </body>
