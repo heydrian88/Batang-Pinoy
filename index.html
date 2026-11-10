@@ -654,7 +654,7 @@
             // Save to Firestore
             try {
                 const proof = await compressProof(proofInput.files[0]);
-                await addDoc(registrationsRef, { ...record, proof, createdAt: serverTimestamp() });
+                await addDoc(registrationsRef, { ...record, proof, createdAt: serverTimestamp(), paidAt: serverTimestamp() });
             } catch (err) {
                 console.error(err);
                 showToast('Save Failed', err.message === 'too-large' ? 'Your screenshot is too large. Please use a smaller image.' : 'Could not save your order. Please try again.', 'error');

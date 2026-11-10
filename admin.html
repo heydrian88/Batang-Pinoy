@@ -564,7 +564,11 @@
             $('orderCount').innerText = orders.length;
             $('noOrders').classList.toggle('hidden', orders.length > 0);
             $('ordersWrap').classList.toggle('hidden', orders.length === 0);
-            // Helpers: what was ordered, and how many
+            // Helpers: date/time, what was ordered, and how many
+            const fmtDT = (ts) => {
+                const d = ts && typeof ts.toDate === 'function' ? ts.toDate() : null;
+                return d ? d.toLocaleString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+            };
             const ordered = (v) => !!v && v !== 'No';
             const sizeLabel = (v) => { const m = /\((.+)\)/.exec(v || ''); return m ? m[1] : v; };
             const jQtyOf = (o) => ordered(o.jacket) ? (o.jacketQty || 1) : 0;
@@ -576,10 +580,13 @@
                   (back ? `<span class="block text-[10px] text-taekwondo-blue font-bold">Back: ${esc(back)}</span>` : '')
                 : '<span class="text-slate-300">—</span>';
 
-            $('ordersBody').innerHTML = orders.map(o => `
+            $('ordersBody').innerHTML = orders.map((o, i) => `
                 <tr class="hover:bg-slate-50">
-                    <td class="p-3 font-bold text-taekwondo-blue whitespace-nowrap">${esc(o.id)}</td>
-                    <td class="p-3 font-semibold text-slate-800">${esc(o.fullName)}<span class="block text-[10px] text-slate-400 font-normal">${esc(o.date)}</span></td>
+                    <td class="p-3 font-black text-taekwondo-blue text-sm whitespace-nowrap">${i + 1}</td>
+                    <td class="p-3 font-semibold text-slate-800">${esc(o.fullName)}
+                        <span class="block text-[10px] text-slate-400 font-normal">${esc(o.id)}</span>
+                        <span class="block text-[10px] text-slate-500 font-normal mt-0.5"><i class="fa-regular fa-clock"></i> Submitted: ${esc(fmtDT(o.createdAt) || o.date)}</span>
+                        ${isPaid(o) ? `<span class="block text-[10px] text-emerald-700 font-semibold"><i class="fa-solid fa-circle-check"></i> Paid: ${esc(fmtDT(o.paidAt) || fmtDT(o.createdAt) || o.date)}</span>` : ''}</td>
                     <td class="p-3 whitespace-nowrap">${itemCell(ordered(o.jacket), sizeLabel(o.jacket), jQtyOf(o), o.jacketBackPrint)}</td>
                     <td class="p-3 whitespace-nowrap">${itemCell(ordered(o.tshirt), sizeLabel(o.tshirt), tQtyOf(o), o.backPrint)}</td>
                     <td class="p-3">${esc(o.fulfillment)}<span class="block text-[10px] text-slate-400">${esc(o.deliveryNote)}</span></td>
