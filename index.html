@@ -183,12 +183,6 @@
                             </label>
                             <select id="jacketSize" onchange="updateCalculation()" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
                                 <option value="">-- Choose Size --</option>
-                                <option value="S">S</option>
-                                <option value="M">M</option>
-                                <option value="L">L</option>
-                                <option value="XL">XL</option>
-                                <option value="2XL">2XL</option>
-                                <option value="3XL">3XL</option>
                             </select>
                             <button type="button" onclick="openSizeChart('jacket')" class="pointer-events-auto mt-1.5 text-xs font-bold text-taekwondo-blue hover:text-blue-800 underline inline-flex items-center gap-1">
                                 <i class="fa-solid fa-ruler-combined"></i> View Size Chart
@@ -228,12 +222,6 @@
                             </label>
                             <select id="tshirtSize" onchange="updateCalculation()" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-taekwondo-blue">
                                 <option value="">-- Choose Size --</option>
-                                <option value="S">S</option>
-                                <option value="M">M</option>
-                                <option value="L">L</option>
-                                <option value="XL">XL</option>
-                                <option value="2XL">2XL</option>
-                                <option value="3XL">3XL</option>
                             </select>
                             <button type="button" onclick="openSizeChart('tshirt')" class="pointer-events-auto mt-1.5 text-xs font-bold text-taekwondo-blue hover:text-blue-800 underline inline-flex items-center gap-1">
                                 <i class="fa-solid fa-ruler-combined"></i> View Size Chart
@@ -477,6 +465,15 @@
         // Prices
         const PRICE_JACKET = 1100;
         const PRICE_TSHIRT = 500;
+
+        // Sizes follow the size charts (same for jacket and t-shirt)
+        const SIZES_ADULT = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
+        const SIZES_KIDS = ['S10', 'S12', 'S14', 'S16', 'S18'];
+        ['jacketSize', 'tshirtSize'].forEach(id => {
+            const sel = document.getElementById(id);
+            const grp = (label, list) => `<optgroup label="${label}">` + list.map(v => `<option value="${v}">${v}</option>`).join('') + '</optgroup>';
+            sel.insertAdjacentHTML('beforeend', grp('Adult Size', SIZES_ADULT) + grp('Kids Size', SIZES_KIDS));
+        });
 
         updateCalculation();
         toggleProofGate();
@@ -779,7 +776,11 @@
                 const thumbs = imgs.length > 1 ? `<div class="flex gap-2 p-3 pb-0">` + imgs.map((im, i) =>
                     `<img src="${im}" onclick="swapImage('${p.docId}', ${i})" class="w-12 h-12 object-cover rounded-lg border-2 ${i === 0 ? 'border-taekwondo-red' : 'border-transparent'} cursor-pointer opacity-90 hover:opacity-100" data-thumb="${p.docId}">`
                 ).join('') + `</div>` : '';
-                const sizes = (p.sizes || []).map(sz => `<span class="text-xs font-bold border border-slate-300 rounded-md px-2.5 py-1 text-slate-700">${esc(sz)}</span>`).join('');
+                const chip = sz => `<span class="text-xs font-bold border border-slate-300 rounded-md px-2.5 py-1 text-slate-700">${esc(sz)}</span>`;
+                const cat = String(p.category || '').toLowerCase();
+                const isGear = cat === 'jacket' || cat === 't-shirt' || cat === 'tshirt';
+                const row = (label, list) => `<div class="flex items-center flex-wrap gap-1.5"><span class="text-[10px] font-bold text-slate-500 w-12">${label}</span>${list.map(chip).join('')}</div>`;
+                const sizes = isGear ? `<div class="space-y-1.5">${row('ADULT', SIZES_ADULT)}${row('KIDS', SIZES_KIDS)}</div>` : (p.sizes || []).map(chip).join('');
                 return `
                 <article class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden flex flex-col">
                     <div class="aspect-[4/5] bg-slate-100 overflow-hidden cursor-zoom-in" onclick="openLightbox('${p.docId}')">
@@ -795,7 +796,7 @@
                             ${p.price ? `<span class="font-black text-taekwondo-blue whitespace-nowrap">₱${Number(p.price).toLocaleString()}</span>` : ''}
                         </div>
                         ${p.description ? `<p class="text-sm text-slate-600 leading-relaxed whitespace-pre-line">${esc(p.description)}</p>` : ''}
-                        ${sizes ? `<div><span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block mb-1.5">Available Sizes</span><div class="flex flex-wrap gap-1.5">${sizes}</div></div>` : ''}
+                        ${sizes ? `<div><span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 block mb-1.5">Available Sizes</span>${isGear ? sizes : `<div class="flex flex-wrap gap-1.5">${sizes}</div>`}</div>` : ''}
                     </div>
                 </article>`;
             }).join('');
