@@ -428,8 +428,8 @@
 
     <!-- Success Toast Notification -->
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3">
-        <div class="bg-emerald-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
-            <i class="fa-solid fa-check"></i>
+        <div id="toastIcon" class="bg-emerald-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">
+            <i id="toastIconI" class="fa-solid fa-check"></i>
         </div>
         <div>
             <h4 class="text-sm font-bold" id="toastTitle">Success!</h4>
@@ -679,14 +679,34 @@
             submitBtn.disabled = true; submitBtn.innerText = 'Submitting...';
 
             // Save to Firestore
+            let proof;
             try {
-                const proof = await compressProof(proofInput.files[0]);
+                proof = await compressProof(proofInput.files[0]);
+            } catch (err) {
+                console.error('Proof image error:', err);
+                showToast('Screenshot Problem',
+                    err.message === 'too-large'
+                        ? 'Your screenshot is too large. Please upload a smaller or cropped screenshot.'
+                        : 'We could not read that image. Please take a fresh screenshot of your GCash receipt (PNG/JPG) and upload that instead.',
+                    'error');
+                submitBtn.disabled = false; submitBtn.innerHTML = submitLabel;
+                return;
+            }
+            try {
                 await addDoc(registrationsRef, { ...record, proof, createdAt: serverTimestamp(), paidAt: serverTimestamp() });
                 try { if (key) await setDoc(doc(db, 'orderNames', key), { name: fullName, count: increment(1), lastAt: serverTimestamp() }, { merge: true }); }
                 catch (err) { console.warn('Name index not updated:', err); }
             } catch (err) {
-                console.error(err);
-                showToast('Save Failed', err.message === 'too-large' ? 'Your screenshot is too large. Please use a smaller image.' : 'Could not save your order. Please try again.', 'error');
+                console.error('Save error:', err);
+                const code = err && err.code ? err.code : (err && err.message) || 'unknown';
+                const inApp = /FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|; wv\)/i.test(navigator.userAgent);
+                let msg;
+                if (code === 'permission-denied') msg = 'The server refused the order. Please contact the organizer.';
+                else if (code === 'resource-exhausted' || code === 'invalid-argument') msg = 'Your order is too big to save. Please upload a smaller screenshot.';
+                else msg = inApp
+                    ? 'Please open this page in Chrome or your phone\'s main browser (not inside Messenger/Facebook), then try again.'
+                    : 'Please check your internet connection (try switching between Wi-Fi and mobile data) and try again.';
+                showToast('Save Failed', msg + ' [' + code + ']', 'error');
                 submitBtn.disabled = false; submitBtn.innerHTML = submitLabel;
                 return;
             }
@@ -737,15 +757,20 @@
         }
 
         // Toast Notification Helper
+        let toastTimer = null;
         function showToast(title, msg, type = 'success') {
             const toast = document.getElementById('toast');
             document.getElementById('toastTitle').innerText = title;
             document.getElementById('toastMsg').innerText = msg;
+            const isErr = type === 'error';
+            document.getElementById('toastIcon').className = (isErr ? 'bg-red-500' : 'bg-emerald-500') + ' text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0';
+            document.getElementById('toastIconI').className = isErr ? 'fa-solid fa-xmark' : 'fa-solid fa-check';
 
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
                 toast.classList.add('translate-y-20', 'opacity-0');
-            }, 4000);
+            }, isErr ? 10000 : 4000);
         }
 
 
@@ -849,22 +874,34 @@
         }
         // Resize + compress so the image fits in a Firestore document (1 MB limit)
         function compressProof(file) {
+            const encode = (src, w, h) => {
+                for (const [maxSide, q] of [[1000, 0.7], [800, 0.6], [640, 0.5], [480, 0.5]]) {
+                    const scale = Math.min(1, maxSide / Math.max(w, h));
+                    const c = document.createElement('canvas');
+                    c.width = Math.max(1, Math.round(w * scale)); c.height = Math.max(1, Math.round(h * scale));
+                    const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+                    ctx.drawImage(src, 0, 0, c.width, c.height);
+                    const out = c.toDataURL('image/jpeg', q);
+                    // some low-memory phones return an empty "data:," when the canvas fails
+                    if (out.startsWith('data:image/jpeg') && out.length > 1000 && out.length < 800000) return out;
+                }
+                throw new Error('too-large');
+            };
             return new Promise((resolve, reject) => {
                 const img = new Image(); const url = URL.createObjectURL(file);
                 img.onload = () => {
                     URL.revokeObjectURL(url);
-                    for (const [maxSide, q] of [[1000, 0.7], [800, 0.6], [640, 0.5]]) {
-                        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-                        const c = document.createElement('canvas');
-                        c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
-                        const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
-                        ctx.drawImage(img, 0, 0, c.width, c.height);
-                        const out = c.toDataURL('image/jpeg', q);
-                        if (out.length < 800000) { resolve(out); return; }
-                    }
-                    reject(new Error('too-large'));
+                    try { resolve(encode(img, img.naturalWidth || img.width, img.naturalHeight || img.height)); }
+                    catch (e) { reject(e); }
                 };
-                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Invalid image')); };
+                img.onerror = async () => {
+                    URL.revokeObjectURL(url);
+                    // fallback decoder for files the <img> tag can't open on some devices
+                    try {
+                        const bmp = await createImageBitmap(file);
+                        resolve(encode(bmp, bmp.width, bmp.height));
+                    } catch (e) { reject(new Error('Invalid image')); }
+                };
                 img.src = url;
             });
         }
